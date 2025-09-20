@@ -1,0 +1,67 @@
+; ************ DESCRIPTION ************
+; Picks up tool QX and probes it
+; If it is an in rack tool, allow the rack to be empty
+; If it is an off rack tool, user must insert a tool
+
+
+; Local variables
+#<_tool_chache> = #17;
+
+; ************ BEGIN VALIDATION ************
+;Check homed state
+o100 if [#<_homed_state> NE 1]
+    (abort, Tool changer offline as machine is not homed. Home your machine to continue.)
+o100 endif
+
+; Check tool changer setup
+o110 if [#1001 NE 1]
+  (abort, Tool changer not initialized. Initialize the tool changer to continue.)
+  M0
+  M99
+o110 endif
+
+; Check rack sync
+; Will also be able to catch people who removed their tool pre-maturely.
+M66 P[#<_tc_input_tis>] L4 Q0.5
+o120 if [[#5399] EQ -1]
+  o121 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    (debug, TOOL CHANGER ERROR - No tool in spindle, but tool number #<_current_tool> is active. Tool number cleared.)
+    M61 Q[#<_empty_tool>]
+    M0
+  o121 endif
+o120 else
+  o122 if [#<_current_tool> EQ 0]
+      (debug, TOOL CHANGER ERROR - Unknown tool in spindle. Resume to move to safe position and unload tool.)
+      M0
+      G53 G0 Z[#<_tc_safe_z>]
+      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+    ; Move to off rack tool load / unload position
+    o123 do
+      (debug, Remove tool using the drawbar button)
+      M0
+      M66 P[#<_tc_input_tis>] L3 Q0.05
+      G4P0.1
+    o123 while [[#5399] EQ -1]
+  o122 endif
+o120 endif
+
+o130 if [#<_tool_chache> LE 0 OR #<_tool_chache> GT #<_tc_table_size>] 
+    (abort, Invalid tool number)
+o130 endif
+; ************ END VALIDATION ************
+
+; ************ BEGIN TOOL CHANGE ************
+#1002 = 1
+M6T[#<_tool_chache>]
+(debug, Tool Change Complete)
+o200 if [#<_current_tool> EQ #<_tool_chache>]
+    (debug, tool change successful, probing current tool)
+    G65P500
+o200 else
+    (debug, tool change unsuccessful, offset cleared)
+    G10 L1 P[#<_tool_chache>] Z0
+o200 endif
+
+; Move to safe height
+G53 G0 Z[#<_tc_safe_z>]
+M99

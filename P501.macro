@@ -1,0 +1,17 @@
+; This is a helper function to display current output status
+
+(debug, Running helper function P503 for pin status display)
+
+#<max_cycle> = 100
+#<movement_per_cycle> = -0.1
+#<current_cycle> = 0
+
+
+o100 do
+    M66 P0 L3 Q0.01
+    G1 G91 Z[#<movement_per_cycle>] F100
+    G4P0
+    #<current_cycle> = [#<current_cycle> + 1]
+    (debug, Cycle #<current_cycle>)
+o100 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+

@@ -1,0 +1,111 @@
+; P901 Load tool at spindle nose
+(debug, Running P900 - Load tool at spindle nose)
+
+; ************ VARIABLES ************
+#<selected_tool_cache> = #17;
+#<load_mode> = 0
+#<load_offset_mode> = 0
+
+; ************ BEGIN VALIDATION ************
+;Check homed state
+o100 if [#<_homed_state> NE 1]
+    (abort, Tool changer offline as machine is not homed. Home your machine to continue.)
+o100 endif
+
+; Check tool changer setup
+o110 if [#1001 NE 1]
+  (abort, Tool changer not initialized. Initialize the tool changer to continue.)
+  M0
+  M99
+o110 endif
+
+; Check rack sync
+; Will also be able to catch people who loaded their tools prematurely by asking them to remove it (can be enhanced to load it into the rack).
+M66 P[#<_tc_input_tis>] L4 Q0.5
+o120 if [[#5399] EQ -1]
+  o121 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    (debug, TOOL CHANGER ERROR - No tool in spindle, but tool number #<_current_tool> is active. Tool number cleared.)
+    M61 Q[#<_empty_tool>]
+    M0
+  o121 endif
+o120 else
+  o122 if [#<_current_tool> EQ 0]
+      (debug, TOOL CHANGER ERROR - Unknown tool in spindle. Resume to move to safe position and unload tool.)
+      M0
+      G53 G0 Z[#<_tc_safe_z>]
+      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+    ; Move to off rack tool load / unload position
+    o123 do
+      (debug, Remove tool using the drawbar button)
+      M0
+      M66 P[#<_tc_input_tis>] L3 Q0.05
+      G4P0.1
+    o123 while [[#5399] EQ -1]
+  o122 endif
+o120 endif
+
+; Check if tool load should be skipped
+o130 if [#<selected_tool_cache> EQ #<_empty_tool>]
+  #<load_mode> = -1
+  (debug, Load skipped)
+o130 elseif [#<selected_tool_cache> GT #<_tc_slots>]
+  #<load_mode> = 1
+  (debug, Load off rack tool)
+o130 else
+ (debug, Load in rack tool)
+o130 endif
+
+o140 if [#<load_mode> EQ 0]
+  #<load_offset_mode> = #<_irt_offset_mode>
+o140 elseif [#<load_mode> EQ 1]
+  #<load_offset_mode> = #<_ort_offset_mode>
+o140 endif
+; ************ END VALIDATION ************
+
+; ************ BEGIN LOAD ************
+
+; Only perform unload if tool is not loaded during validation
+
+o200 if [#<load_mode> NE -1]
+    ; ************ MOTION BLOCK - LOAD OFF RACK TOOL ************
+    ; Move to off rack tool load / unload position
+    G53 G0 Z[#<_tc_safe_z>]
+    G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+
+    ; Pause as long as the tool is not removed
+    o210 do
+        (debug, Install tool #<selected_tool_cache> with the drawbar button)
+        M0
+        M66 P[#<_tc_input_tis>] L4 Q0.05
+        G4P0.1
+    o210 while [[#5399] EQ -1]
+o200 endif
+
+; Change current tool number
+M61 Q[#<selected_tool_cache>]
+G4P0
+
+(debug, Load Complete)
+; ************ END LOAD ************
+
+; ************ BEGIN TOOL LENGTH MANAGEMENT (LOAD) ************
+
+; Apply existing tool offset (if any), this will be used if compensation fails.
+G43 H[#<_current_tool>]
+
+; Execute probing if not part of a probing cycle and not loading an empty tool
+; Probe when
+; Not in probe mode
+; Not loading an empty tool 
+o800 if [#<load_mode> NE -1]
+  ; If offset mode is 0, probe
+  ; If offset mode is 1, apply existing offset
+  ; If offset mode is 2, check
+
+  o810 if [#<load_offset_mode> EQ 0]
+    G65P500    
+  o810 elseif [#<load_offset_mode> EQ 2]
+    G65P500Q1
+  o810 endif
+o800 endif
+; ************ END TOOL LENGTH MANAGEMENT (LOAD) ************

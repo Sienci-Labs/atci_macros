@@ -1,0 +1,62 @@
+; This is a helper function to display current output status
+
+(debug, Running helper function P503 for pin status display)
+
+#<max_cycle> = 500
+#<movement_per_cycle> = 0.1
+#<current_cycle> = 0
+#<x_min> = 0
+#<x_max> = 0
+
+#<y_min> = 0
+#<y_max> = 0
+
+o100 do
+    M66 P0 L3 Q0.01
+    G1 G91 X[#<movement_per_cycle>] F100
+    G4P0
+    #<current_cycle> = [#<current_cycle> + 1]
+    (debug, Cycle #<current_cycle>)
+o100 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+
+#<x_min> = #5420
+G0G91X12
+G4P0
+#<current_cycle> = 0
+
+o101 do
+    M66 P0 L3 Q0.01
+    G1 G91 X[-1 * [#<movement_per_cycle>]] F100
+    G4P0
+    #<current_cycle> = [#<current_cycle> + 1]
+    (debug, Cycle #<current_cycle>)
+o101 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+#<x_max> = #5420
+(debug, x min is #<x_min> and x max is #<x_max>)
+G0G91X[[#<x_min> - #<x_max>]/2]
+G0G91Y-1.5
+#<current_cycle> = 0
+o102 do
+    M66 P0 L3 Q0.01
+    G1 G91 Y[#<movement_per_cycle>] F100
+    G4P0
+    #<current_cycle> = [#<current_cycle> + 1]
+    (debug, Cycle #<current_cycle>)
+o102 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+
+#<y_min> = #5421
+G0G91Y12
+G4P0
+#<current_cycle> = 0
+
+o103 do
+    M66 P0 L3 Q0.01
+    G1 G91 Y[-1 * [#<movement_per_cycle>]] F100
+    G4P0
+    #<current_cycle> = [#<current_cycle> + 1]
+    (debug, Cycle #<current_cycle>)
+o103 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+#<y_max> = #5421
+(debug, y min is #<y_min> and xymax is #<y_max>)
+G0G91Y[[#<y_min> - #<y_max>]/2]
+

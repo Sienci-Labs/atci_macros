@@ -1,0 +1,189 @@
+; ******** BEGIN USER CONFIGURATION ********
+
+; ******** BASIC SETUP ********
+
+; The number of slots in your magazine.
+#<_tc_slots> = 6
+(debug, Slots: #<_tc_slots>)
+
+; The number of slots in your tool table.
+#<_tc_table_size> = 32
+(debug, Table size: #<_tc_table_size>)
+
+; ******** OFFSET BEHAVIOR SETUP ********
+; Offset Management Mode
+; 0: Always probe new offset
+; 1: Always use tool table offset
+; 2: Always use tool table offset and verify
+
+#<_irt_offset_mode> = 2;
+#<_ort_offset_mode> = 0;
+
+; ******** COORDINATE SETUP ********
+; ******** XY Axis ********
+; The X and Y machine coordinate positions of slot 1.
+#<_tc_slot_one_x> = #5341
+(debug, Slot 1 X: #<_tc_slot_one_x> from G59.1)
+#<_tc_slot_one_y> = #5342
+(debug, Slot 1 Y: #<_tc_slot_one_y> from G59.1)
+
+; The slot offset for your rack.
+#<_tc_slot_offset> = 90
+(debug, Slot Offset: #<_tc_slot_offset>)
+
+; The X and Y machine coordinate positions for loading off rack tools
+#<_tc_off_rack_x> = #5361
+(debug, Off rack X: #<_tc_off_rack_x>, from G59.2)
+#<_tc_off_rack_y> = #5362
+(debug, Off rack Y: #<_tc_off_rack_y>, from G59.2)
+
+; The Y machine coordinate positon for Y-axis pulloff.
+#<_tc_y_pulloff> = 0
+(debug, Pulloff Y: #<_tc_y_pulloff>)
+
+; The feedrate for Y-axis pulloff.
+#<_tc_y_pulloff_feed> = 1000
+(debug, Pulloff Y Feedrate: #<_tc_y_pulloff_feed>)
+
+; ******** Z Axis ********
+; The Z machine coordinate positon for load.
+#<_tc_load_z> = #5343
+(debug, Load Z: #<_tc_load_z> from G59.1 coordinate)
+
+; The Z coordinate offset for dedust start.
+#<_tc_dedust_z_offset> = 20
+(debug, Dedust Z Offset: #<_tc_dedust_z_offset>)
+
+; The Z axis dedust feedrate.
+#<_tc_z_dedust_feed> = 1500
+(debug, Z Dedust Feedrate: #<_tc_z_dedust_feed>)
+
+; The Z machine coordinate position for clearing all obstacles.
+#<_tc_safe_z> = 0
+(debug, Safe Clearance Z: #<_tc_safe_z>)
+
+; ******** DRAWBAR CONTROL ********
+
+; The output pin for the drawbar
+#<_tc_output_db> = 1
+(debug, Drawbar output at pin #<_tc_output_db>)
+
+; The output pin for air seal
+#<_tc_output_as> = 0
+(debug, NO Air seal output at pin #<_tc_output_as>)
+
+; The output pin for tool change button enable
+#<_tc_output_bt> = 2
+(debug, NO Air seal output at pin #<_tc_output_as>)
+
+; The input pin for the drawbar sensor
+#<_tc_input_db> = 0
+(debug, Drawbar sensor at pin #<_tc_input_db>)
+
+; The input pin for the tool in spindle sensor
+#<_tc_input_tis> = 1
+(debug, Tool in spindle sensor at pin #<_tc_input_tis>)
+
+; ******** TOOL LENGTH PROBE CONTROL ********
+; X and Y machine coordinate positions of the tool setter.
+#<_tc_measure_x> = #5381
+(debug, Tool Measure X: #<_tc_measure_x>, from G59.3)
+#<_tc_measure_y> = #5382
+(debug, Tool Measure Y: #<_tc_measure_y>, from G59.3)
+
+; Z machine coordinate position at which to begin the initial probe.
+#<_tc_measure_start_z> = 0
+(debug, Tool Measure Start Z: #<_tc_measure_start_z>)
+
+; The distance to probe in search of the tool setter for the initial probe.
+#<_tc_seek_dist> = -150
+(debug, Tool Measure Seek Distance: #<_tc_seek_dist>)
+
+; The distance to retract after the initial probe trigger.
+#<_tc_retract_dist> = 2
+(debug, Tool Measure Retract Distance: #<_tc_retract_dist>)
+
+; The feed rate for the initial probe.
+#<_tc_seek_feed> = 1000
+(debug, Tool Measure Seek Feed Rate: #<_tc_seek_feed>)
+
+; The feed rate for the second probe.
+#<_tc_set_feed> = 50
+(debug, Tool Measure Set Feed Rate: #<_tc_set_feed>)
+
+; Check tool length when tool changing
+#<_check_tl_error> = 1
+(debug, Maximum tool length difference to trigger an incorrect tool error #<_check_tl_error>)
+
+; ******** SYSTEM VARIABLES ********
+; Assign tool 0 as empty
+#<_empty_tool> = 0
+(debug, Empty tool assigned to: T#<_empty_tool>)
+
+#<_comp_ver> = 20250618
+(debug, Compatible version: #<_comp_ver>)
+
+; ******** STARTUP ********
+; ******** STARTUP ACTIONS ********
+; Turn off spindle, highly unlikely scenario
+M5
+
+; ******** STARTUP CHECK ********
+
+;Check homed state
+o100 if [#<_homed_state> NE 1]
+  (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
+o100 endif
+
+; Check if state of the spindle is in sync with firmware
+M66 P[#<_tc_input_tis>] L4 Q0.5
+
+o110 if [[#5399] EQ -1]
+  o111 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
+    M61 Q[#<_empty_tool>]
+    M0
+  o111 endif
+o110 else
+  o112 if [#<_current_tool> EQ 0]
+      (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
+      M0
+      G53 G0 Z[#<_tc_safe_z>]
+      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+    ; Move to off rack tool load / unload position
+    o113 do
+      (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+      G4P0
+      M64 P[#<_tc_output_bt>]
+      M0
+      M66 P[#<_tc_input_tis>] L3 Q0.05
+      G4P0.1
+    o113 while [[#5399] EQ -1]
+    M65 P[#<_tc_output_bt>]
+  o112 endif
+o110 endif
+
+
+; ******** APPLY TOOL OFFSET ********
+
+; Reapply tool offset at startup
+o200 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+  G43 H[#<_current_tool>]
+  (debug, Tool offset for #<_current_tool> applied)
+o200 else
+  G49
+  (debug, Tool not in holder, offsets cleared)
+o200 endif
+
+; The flag indicating that the settings have been loaded into memory.
+#1001 = 1
+(debug, Tool changer ready flag Set: #1001)
+(debug, Sienci ATC Configuration Loaded)
+
+; The flag in an internal variable for tracking whether tool length measurement is active
+#1002 = 0
+
+; ********SENDER COMMUNICATIONS ********
+(print,ATCI|table_size:#<_tc_table_size>|rack_size:#<_tc_slots>)
+
+M99

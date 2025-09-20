@@ -1,0 +1,31 @@
+; This is a helper function to display current output status
+
+(debug, Running helper function P503 for pin status display)
+
+M66 P0 L3 Q0.01
+o100 if [[#5399] EQ -1]
+    (debug, Pin 0 status is low)
+o100 else
+    (debug, Pin 0 status is high)
+o100 endif
+
+M66 P1 L3 Q0.01
+o110 if [[#5399] EQ -1]
+    (debug, Pin 1 status is low)
+o110 else
+    (debug, Pin 1 status is high)
+o110 endif
+
+M66 P2 L3 Q0.01
+o120 if [[#5399] EQ -1]
+    (debug, Pin 2 status is low)
+o120 else
+    (debug, Pin 2 status is high)
+o120 endif
+
+M66 P3 L3 Q0.01
+o130 if [[#5399] EQ -1]
+    (debug, Pin 3 status is low)
+o130 else
+    (debug, Pin 3 status is high)
+o130 endif

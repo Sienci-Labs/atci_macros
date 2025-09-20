@@ -1,0 +1,58 @@
+; This is a helper function to probe the currently installed tool and reapply any new tool offsets.
+; If called without an argument, it will overwrite the existing tool offset
+; If called with an argument of Q1, it will check the currently stored offset against the tool table.
+
+#<_probe_mode> = #17
+
+;Move to tool length sensor
+G53 G0 Z[#<_tc_safe_z>]
+G53 G0 X[#<_tc_measure_x>]
+G53 G0 Y[#<_tc_measure_y>]
+G53 G0 Z[#<_tc_measure_start_z>]
+
+;Scrub old offset, such that it will appear as 0 if probing fails.
+o100 if [#<_probe_mode> EQ 0]
+    G10 L1 P[#<_current_tool>] Z0
+    G43 H[#<_current_tool>]
+o100 endif
+
+; Touch-off
+G38.2 G91 Z[#<_tc_seek_dist>] F[#<_tc_seek_feed>]
+G90
+
+; Compute tool offset
+#<tool_offset> = [#[5203 + [#5220 * 20]] + #5063]
+(debug, Tool #<_current_tool> offset is #<tool_offset>)
+
+o200 if [#<_probe_mode> EQ 0]
+    ; Define new offset
+    G10 L1 P[#<_current_tool>] Z[#<tool_offset>]
+o200 elseif [#<_probe_mode> EQ 1]
+    ; Check existing offset
+    G65P2Q[#<_current_tool>]R2
+    o210 while [ABS[#<tool_offset> - #<_value>] GT #<_check_tl_error>]
+        (print, ATCI:0|Offset difference greater than #<_check_tl_error>|Resume to reprobe this tool or reset.)
+        M0
+        ;Reprobe offset, recursive call has race condition issues so using a while loop instead
+        ; Touch-off
+        ;Move to tool length sensor
+        G53 G0 Z[#<_tc_safe_z>]
+        G53 G0 X[#<_tc_measure_x>]
+        G53 G0 Y[#<_tc_measure_y>]
+        G53 G0 Z[#<_tc_measure_start_z>]
+        G38.2 G91 Z[#<_tc_seek_dist>] F[#<_tc_seek_feed>]
+        G90
+        ; Compute tool offset
+        #<tool_offset> = [#[5203 + [#5220 * 20]] + #5063]
+        (debug, Tool #<_current_tool> offset is #<tool_offset>)
+        G10 L1 P[#<_current_tool>] Z[#<tool_offset>]
+        G65P2Q[#<_current_tool>]R2
+    o210 endwhile
+o200 endif
+
+; Apply new offset.
+G43 H[#<_current_tool>]
+
+; Move to safe height
+G53 G0 Z[#<_tc_safe_z>]
+M99
