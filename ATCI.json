@@ -1,5 +1,5 @@
 {
-  "version": 20250909,
+  "version": 20251009,
   "variables": {
     "_tc_rack_enable": {
       "value": 0,
@@ -7,15 +7,15 @@
     },
     "_tc_slots": {
       "value": 0,
-      "default": 0
+      "default": 12
     },
     "_tc_slot_offset": {
       "value": 0,
-      "default": 0
+      "default": 92
     },
     "_irt_offset_mode": {
       "value": 0,
-      "default": 0
+      "default": 2
     },
     "_ort_offset_mode": {
       "value": 0,
@@ -27,11 +27,11 @@
     },
     "_holder_sense": {
       "value": 0,
-      "default": 0
+      "default": 1
     },
     "_pres_sense": {
       "value": 0,
-      "default": 0
+      "default": 1
     }
   },
   "variableFile": "P100.macro",
