@@ -3,7 +3,8 @@
 ; ******** BASIC SETUP ********
 
 ; The number of slots in your magazine.
-#<_tc_slots> = 6
+; TODO: Full P100 Migration and validation, currently disabled
+; #<_tc_slots> = 6
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
@@ -16,8 +17,9 @@
 ; 1: Always use tool table offset
 ; 2: Always use tool table offset and verify
 
-#<_irt_offset_mode> = 2;
-#<_ort_offset_mode> = 0;
+; TODO: Full P100 Migration and validation, currently disabled
+;#<_irt_offset_mode> = 2;
+;#<_ort_offset_mode> = 0;
 
 ; ******** COORDINATE SETUP ********
 ; ******** XY Axis ********
@@ -28,7 +30,8 @@
 (debug, Slot 1 Y: #<_tc_slot_one_y> from G59.1)
 
 ; The slot offset for your rack.
-#<_tc_slot_offset> = 90
+; TODO: Full P100 Migration and validation, currently disabled
+;#<_tc_slot_offset> = 90
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
