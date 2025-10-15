@@ -1,0 +1,105 @@
+
+;================setup================
+#<sensPin> = 0
+#<movStep> = 0.2
+#<bkoffDist> = 5
+#<timeout> = [[#<bkoffDist> / #<movStep>] + 2]
+#<currCyclei> = 0
+#<currCyclej> = 0
+#<studDiam> = 6.5
+;setup temp probe positions
+#<X1> = -1
+#<Y1> = -1
+#<Z1> = -1
+#<X2> = -1
+#<Y2> = -1
+#<Z2> = -1
+
+#<y_prb_1> = -1
+#<x_prb_l_1> = -1
+#<x_prb_r_1> = -1
+#<y_prb_2> = -1
+#<x_prb_l_2> = -1
+#<x_prb_r_2> = -1
+
+;=================MACRO=====================
+(debug, TESTING PROBE MACRO)
+M0
+
+;check probe in starting position
+M66 P[#<sensPin>] L4 Q0.01
+
+o100 if [#5399 EQ -1]
+    (abort, ATCI:1|Probe not prepositioned on pullstud, please reposition and retry)
+    M99
+o100 endif
+
+G4P0.1
+;backoff from pullstud
+G1 G91 X[#<bkoffDist>] Y[#<bkoffDist>] F2000
+G4P0.1
+
+;Find First Stud Y pos
+o101 do
+    o102 do
+        M66 P[#<sensPin>] L3 Q0.01
+        G1 G91 X[-1 * #<movStep>] F1000
+        #<currCyclei> = [#<currCyclei> + 1]
+    o102 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
+    G1 G91 X[#<movStep> * #<currCyclei>] F1000
+    #<y_prb_1> = #5421
+    G1 G91 Y[-1 * #<movStep>]
+    #<currCyclej> = [#<currCyclej> + 1]
+    #<currCyclei> = 0
+o101 while [[#5399 NE -1] AND [#<currCyclej> LT #<timeout>]]
+
+o103 if [#5399 EQ -1]
+    #<y_prb_1> = 0
+    (abort, ATCI:1|Probe failed to find pullstud)
+    M99
+o103 endif
+
+
+;Find First Stud X Pos
+G1 G91 X[[#<movStep> * #<currCyclei>] + #<backoff>] Y[-1 * #<studDiam> / 2] F2000
+#<currCyclei> = 0
+
+o104 do
+    M66 P[#<sensPin>] L3 Q0.01
+    G1 G91 X[-1 * #<movStep>] F1000
+    #<currCyclei> = [#<currCyclei> + 1]
+o104 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
+
+o105 if [#5399 EQ -1]
+    (abort, ATCI:1|Probe failed to find pullstud)
+    M99
+o105 endif
+
+#<x_prb_r_1> = #5420
+G1 G91 Z[#<backoff>] F2000
+G1 G91 X[[-1 * #<studDiam>] - #<backoff>] F2000
+G1 G91 Z[-1 * #<backoff>] F2000
+#<currCyclei> = 0
+
+o106 do
+    M66 P[#<sensPin>] L3 Q0.01
+    G1 G91 X[#<movStep>] F1000
+    #<currCyclei> = [#<currCyclei> + 1]
+o106 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
+
+o107 if [#5399 EQ -1]
+    (abort, ATCI:1|Probe failed to find pullstud)
+    M99
+o107 endif
+
+#<x_prb_l_1> = #5420
+#<X1> = [[#<x_prb_r_1> - #<x_prb_l_1>] / 2]
+(print, X Rad: #<X1>)
+#<X1> = [#<X1> + #<x_prb_l_1>]
+(print, X Pos: #<X1>)
+
+;Find Second Stud Y
+
+
+(debug, PROBE MACRO COMPLETE)
+M99
