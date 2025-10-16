@@ -1,9 +1,8 @@
-
 ;================setup================
 #<sensPin> = 0
 #<movStep> = 0.2
-#<bkoffDist> = 5
-#<timeout> = [[#<bkoffDist> / #<movStep>] + 2]
+#<bkoffDist> = 6
+#<timeout> = [[#<bkoffDist> / #<movStep>] + 8]
 #<currCyclei> = 0
 #<currCyclej> = 0
 #<studDiam> = 6.5
@@ -34,72 +33,149 @@ o100 if [#5399 EQ -1]
     M99
 o100 endif
 
+(print, Repositioning...)
 G4P0.1
 ;backoff from pullstud
-G1 G91 X[#<bkoffDist>] Y[#<bkoffDist>] F2000
-G4P0.1
+G1 G91 X[#<bkoffDist>] Y[#<bkoffDist>] F3000
+G4P0.5
+M66 P[#<sensPin>] L4 Q0.01
 
 ;Find First Stud Y pos
-o101 do
-    o102 do
-        M66 P[#<sensPin>] L3 Q0.01
-        G1 G91 X[-1 * #<movStep>] F1000
+(print, First Stud Pos Search)
+(print, current status: #5399, #<currCyclei>, #<currCyclej>, #<timeout>)
+o101 while [[#5399 NE 0] AND [#<currCyclej> LT #<timeout>]]
+    (print, looping)
+    o201 do
+        G1 G91 X[-1 * #<movStep>] F3000
+        M66 P[#<sensPin>] L4 Q0.001
         #<currCyclei> = [#<currCyclei> + 1]
-    o102 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
-    G1 G91 X[#<movStep> * #<currCyclei>] F1000
-    #<y_prb_1> = #5421
+        ;(print, 102 cycle: #<currCyclei> Pin: #5399)
+        G4P0
+    o201 while [[#5399 NE 0] AND [#<currCyclei> LT [#<timeout>-1]]]
+    o202 if [#5399 EQ 0]
+        (print, Found Pullstud)
+        #<y_prb_1> = #<_y>
+        o101 break
+    o202 endif
+    G1 G91 X[#<movStep> * #<currCyclei>] F3000
     G1 G91 Y[-1 * #<movStep>]
     #<currCyclej> = [#<currCyclej> + 1]
     #<currCyclei> = 0
-o101 while [[#5399 NE -1] AND [#<currCyclej> LT #<timeout>]]
+o101 endwhile
 
-o103 if [#5399 EQ -1]
+o102 if [#5399 NE 0]
+    (print, #<currCyclei> #<currCyclej>)
     #<y_prb_1> = 0
     (abort, ATCI:1|Probe failed to find pullstud)
     M99
-o103 endif
+o102 endif
 
+(print, Y Probe Success: #<y_prb_1>)
+M0
 
 ;Find First Stud X Pos
-G1 G91 X[[#<movStep> * #<currCyclei>] + #<backoff>] Y[-1 * #<studDiam> / 2] F2000
+G4P0
+G1 G91 X[[#<studDiam> / 2] + #<bkoffDist>] Y[-1 * [#<studDiam> / 3]] F2000
+M66 P[#<sensPin>] L4 Q0.01
+G4P0
+#<currCyclei> = 0
+
+;Find Y Centerline
+#<xMax> = -999999
+#<foundXMax> = -1
+o103 do
+    o201 do
+        G4P0
+        G1 G91 X[-1 * #<movStep>] F3000
+        M66 P[#<sensPin>] L4 Q0.01
+        #<currCyclei> = [#<currCyclei> + 1]
+        G4P0
+    o201 while [[#5399 NE 0] AND [#<currCyclei> LT #<timeout>]]
+
+    o202 if [#5399 NE 0]
+        (abort, ATCI:1|timeout finding y centerline)
+        M99
+    o202 elseif [#5399 EQ 0]
+        (print, Y pos: #<_y>)
+        (print, X compare: #<xMax>, #<_x>)
+        o301 if [#<xMax> GE #<_x>]
+            (print, Found Highest X Pos)
+            #<foundXMax> = 1
+            ;G1 G91 Y[#<movStep>] F2000
+            o103 break
+        o301 elseif [#<_x> GE #<xMax>]
+            (print, Still Searching...)
+            #<xMax> = #<_x>
+            #<foundXMax> = 0
+        o301 endif
+    o202 endif
+    (print, Searching next y pos...)
+    G4P0
+    G1 G91 X[#<movStep> * #<currCyclei>] F3000
+    G1 G91 Y[-1 * #<movStep>] F3000
+    M66 P[#<sensPin>] L4 Q0.01
+    G4P0
+    #<currCyclei> = 0
+o103 while [#<foundXMax> LT 1]
+
+G4P1
+M0
+;Find X Centerline
+#<x_prb_r_1> = #<xMax>
+G4P0
+G1 G91 Z[#<bkoffDist>] F2000
+G1 G91 X[[-1 * #<studDiam>] - #<bkoffDist>] F2000
+G1 G91 Z[-1 * #<bkoffDist>] F2000
+G4P0
+M66 P[#<sensPin>] L4 Q0.01
 #<currCyclei> = 0
 
 o104 do
-    M66 P[#<sensPin>] L3 Q0.01
-    G1 G91 X[-1 * #<movStep>] F1000
+    G1 G91 X[#<movStep>] F1000
+    M66 P[#<sensPin>] L4 Q0.01
     #<currCyclei> = [#<currCyclei> + 1]
-o104 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
+    G4P0
+o104 while [[#5399 NE 0] AND [#<currCyclei> LT #<timeout>]]
 
-o105 if [#5399 EQ -1]
+o105 if [#5399 NE 0]
     (abort, ATCI:1|Probe failed to find pullstud)
     M99
 o105 endif
 
-#<x_prb_r_1> = #5420
-G1 G91 Z[#<backoff>] F2000
-G1 G91 X[[-1 * #<studDiam>] - #<backoff>] F2000
-G1 G91 Z[-1 * #<backoff>] F2000
+;Find stud diameter
+#<x_prb_l_1> = #<_x>
+#<prbRad> = [[ABS[#<x_prb_r_1> - #<x_prb_l_1>] - #<studDiam>]/2]
+(print, X Rad: #<X1>)
+
+;Calculate X centerline position
+#<X1> = [[[#<x_prb_r_1> - #<x_prb_l_1>] / 2] + #<x_prb_l_1>]
+(print, X Pos: #<X1>)
+
+M0
+;Z probe
+G4P0
+G1 G91 Z[#<bkoffDist>] F3000
+G1 G90 X[#<X1>] F2000
+G4P0
+M66 P[#<sensPin>] L4 Q0.01
 #<currCyclei> = 0
 
 o106 do
-    M66 P[#<sensPin>] L3 Q0.01
-    G1 G91 X[#<movStep>] F1000
+    G1 G91 Z[-1 * #<movStep>] F1000
+    M66 P[#<sensPin>] L4 Q0.01
     #<currCyclei> = [#<currCyclei> + 1]
-o106 while [[#5399 NE -1] AND [#<currCyclei> LT #<timeout>]]
+    G4P0
+o106 while [[#5399 NE 0] AND [#<currCyclei> LT #<timeout>]]
 
-o107 if [#5399 EQ -1]
+o107 if [#5399 NE 0]
     (abort, ATCI:1|Probe failed to find pullstud)
     M99
 o107 endif
 
-#<x_prb_l_1> = #5420
-#<X1> = [[#<x_prb_r_1> - #<x_prb_l_1>] / 2]
-(print, X Rad: #<X1>)
-#<X1> = [#<X1> + #<x_prb_l_1>]
-(print, X Pos: #<X1>)
+#<Z1> = #<_z>
+(print, Stud 1 Pos: #<X1>, #<Y1>, #<Z1>)
 
 ;Find Second Stud Y
-
 
 (debug, PROBE MACRO COMPLETE)
 M99
