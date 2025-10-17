@@ -3,7 +3,7 @@
 ; ******** BASIC SETUP ********
 
 ; The number of slots in your magazine. Defined in P100.macro, will abort if not defined.
-; #<_tc_slots> = 6; Enable for Ad-hoc definition.
+;#<_tc_slots> = 6; Enable for Ad-hoc definition.
 o100 if [[EXISTS[#<_tc_slots>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slots", rerun ATC setup and try again)
 o100 endif
@@ -41,7 +41,7 @@ o101 endif
 ; The slot offset for your rack. Defined by variables #<_tc_slot_offset>
 ; Defined in P100.macro, will abort if not defined.
 
-;#<_tc_slot_offset> = 92; Enable for Ad-hoc definition.
+;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 o102 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
@@ -55,7 +55,7 @@ o102 endif
 (debug, Off rack Y: #<_tc_off_rack_y>, from G59.2)
 
 ; The Y machine coordinate positon for Y-axis pulloff.
-#<_tc_y_pulloff> = 0
+#<_tc_y_pulloff> = [#<_tc_slot_one_y> + 44]
 (debug, Pulloff Y: #<_tc_y_pulloff>)
 
 ; The feedrate for Y-axis pulloff.
@@ -91,11 +91,15 @@ o102 endif
 
 ; The output pin for tool change button enable
 #<_tc_output_bt> = 2
-(debug, NO Air seal output at pin #<_tc_output_as>)
+(debug, Button output at pin #<_tc_output_bt>)
 
 ; The input pin for the drawbar sensor
 #<_tc_input_db> = 0
 (debug, Drawbar sensor at pin #<_tc_input_db>)
+
+; The input pin for the tool holder sensor, nominally tied with drawbar sensor.
+#<_tc_input_th> =  #<_tc_input_db>
+(debug, Tool holder sensor at pin #<_tc_input_th>)
 
 ; The input pin for the tool in spindle sensor
 #<_tc_input_tis> = 1
@@ -131,6 +135,26 @@ o102 endif
 ; Check tool length when tool changing
 #<_check_tl_error> = 1
 (debug, Maximum tool length difference to trigger an incorrect tool error #<_check_tl_error>)
+
+; ******** TOOL HOLDER SENSOR CONTROL ********
+
+#<_holder_sense> = 1;
+
+o103 if [[EXISTS[#<_holder_sense>]] EQ 0]
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
+o103 endif
+(debug, Tool Holder Sensor: #<_holder_sense>)
+
+; Tool holder sensor Y offset relative to spindle center line
+#<_tc_holder_sense_offset_y> = 44;
+(debug, Slot Offset: #<_tc_holder_sense_offset_y>)
+
+; Tool holder sensor Z offset relative to top of pull stud
+#<_tc_holder_sense_offset_z> = 11;
+(debug, Slot Offset: #<_tc_holder_sense_offset_z>)
+
+#<_tc_holder_sense_seek_z> = 8;
+(debug, Slot Offset: #<_tc_holder_sense_seek_z>)
 
 ; ******** SYSTEM VARIABLES ********
 ; Assign tool 0 as empty
@@ -197,8 +221,14 @@ o300 endif
 (debug, Tool changer ready flag Set: #1001)
 (debug, Sienci ATC Configuration Loaded)
 
-; The flag in an internal variable for tracking whether tool length measurement is active
+; The flag is an internal variable for tracking whether tool length measurement is active
 #1002 = 0
+
+; The flag is an internal variable for tracking whether manual tool unloading is forced (for in rack tools)
+#1003 = 0
+
+; The flag is an internal variable for tracking whether manual tool loading is forced (for in rack tools)
+#1004 = 0
 
 ; ********SENDER COMMUNICATIONS ********
 (print,ATCI|table_size:#<_tc_table_size>|rack_size:#<_tc_slots>)

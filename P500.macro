@@ -55,4 +55,3 @@ G43 H[#<_current_tool>]
 
 ; Move to safe height
 G53 G0 Z[#<_tc_safe_z>]
-M99

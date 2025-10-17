@@ -1,0 +1,69 @@
+; This is the firmware configuration file that governs the application of firmware values required to operate the Sienci ATCi system.
+; Asterisks (*) indicate non ATC specific firmware settings
+
+
+; ******** SPINDLE SETTINGS ********
+(print, Applying spindle settings)
+$395 = 2;       Default spindle is H100*
+$30 = 23999;    Max RPM*
+$31 = 7500;     Min RPM*
+
+$340 = 5;       Spindle at speed tolerance (percentage)*
+$394 = 11;      Spindle on delay (seconds)*
+$539 = 15;      Spindle off delay (seconds)
+
+$476 = 2;       Spindle modbus address*
+$374 = 3;       MODBUS baud rate*
+$375 = 50;      MODBUS RX timeout*
+$681 = 0;       MODBUS serial format*
+
+; ******** TOOL PROBE SETTINGS ********
+
+
+; ******** TOOL CHANGER SETTINGS ********
+; xxxxxxxx GENERAL CONFIG xxxxxxxx
+(print, Applying tool changer settings)
+$485 = 1;       Keep tool number over reboot
+$675 = 3;       Execute M6T0 and Fail M6 if tc.macro is not found
+; xxxxxxxx PIN CONFIG xxxxxxxx
+G65P1Q370;
+o100 if [_value]
+(debug, 370 #<_value>)
+G65P1Q372;
+(debug, 372 #<_value>)
+$370 = 0;       Invert I/O Port inputs (TODO: Not override unrrelated bitfields)
+$372 = 1;       Invert I/O Port outputs (TODO: Not override unrrelated bitfields)
+
+$750 = 7;       Event 1 trigger: Spindle at speed
+$751 = 0;       Event 2 trigger: M62 - M65 only
+$752 = 0;       Event 3 trigger: M62 - M65 only
+
+$760 = 0;       Event 1 port
+$761 = 1;       Event 2 port
+$762 = 2;       Event 3 port
+
+; ******** KEEPOUT AREA SETTINGS ********
+
+; ******** SD CARD SETTINGS ********
+(print, Applying SD settings)
+$650 = 1;       Auto mount SD Card
+
+; ******** COMMUNICATIONS SETTINGS ********
+(print, Applying communications settings)
+$534 = 1;       Output NGC debug message
+
+; ******** OTHER SETTINGS ********
+(print, Applying other settings)
+$676 = 3;       On reset, clear homed status if position was lost and clear offsets
+
+; ******** REFRESH ********
+(print, Refreshing Firmware Settings)
+G4P0;
+$$
+G4P0;
+
+; ******** STARTUP RELATED SETTINGS ********
+; TODO Add flag to supress error checking in P200.macro
+(print, Applying startup related settings)
+;$N1=G65P100
+;$N0=G65P200

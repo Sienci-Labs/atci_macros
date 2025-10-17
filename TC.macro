@@ -12,8 +12,11 @@
 
 ; Local variables
 #<probing> = 0; Probe Mode
+#<force_manual_unload> = 0;
+#<force_manual_load> = 0;
 #<unload_mode> = 0;
 #<load_mode> = 0
+#<passthrough> = 1;
 #<unload_offset_mode> = 0
 #<load_offset_mode> = 0
 #<selected_tool_cache> = 0; Caching selected tool variable as M61 will clear this variable when changing current tool to 0 between tool unload and tool load.
@@ -58,6 +61,7 @@ o120 else
 o120 endif
 
 ; Check if tool changing as part of a probe cycle
+; TODO: Move earlier to reset these settings and prevent them from caching if the above checks fail.
 o130 if [#1002 EQ 1]
   (debug, Mode: Probing)
   #1002 = 0
@@ -66,53 +70,73 @@ o130 else
   (debug, Mode: Normal)
 o130 endif
 
+o131 if [#1003 EQ 1]
+  (debug, Forced Manual Tool Unload)
+  #1003 = 0
+  #<force_manual_unload> = 1
+o131 endif
+
+o132 if [#1004 EQ 1]
+  (debug, Forced Manual Tool Load)
+  #1004 = 0
+  #<force_manual_load> = 1
+o132 endif
+
+; Check if pin goes high which indicate rack is present and we can disable passthrough.
+M66 P3 L3 Q0.01
+o133 if [#5399 NE -1]
+  #<passthrough> = 0;
+o133 endif
+
 ; Check if tool unload should be skipped
 o140 if [#<_current_tool> EQ #<_empty_tool>]
   #<unload_mode> = -1
   (debug, Unload skipped)
-o140 elseif [#<_current_tool> GT #<_tc_slots>]
+o140 elseif [#<_current_tool> GT #<_tc_slots> OR #<force_manual_unload> EQ 1 OR #<passthrough> EQ 1]
   #<unload_mode> = 1
-  (debug, Unload off rack tool)
+  (debug, Manual unload)
 o140 else
-  (debug, Unload in rack tool)
+  (debug, Rack unload)
 o140 endif
 
-; Check if tool load should be skipped
+; Check if tool load should be skipped and if it should be loaded manually 
 o141 if [#<_selected_tool> EQ #<_empty_tool>]
   #<load_mode> = -1
   (debug, Load skipped)
-o141 elseif [#<_selected_tool> GT #<_tc_slots>]
+o141 elseif [#<_selected_tool> GT #<_tc_slots> OR #<force_manual_load> EQ 1 OR #<passthrough> EQ 1]
   #<load_mode> = 1
-  (debug, Load off rack tool)
+  (debug, Manual load)
 o141 else
- (debug, Load in rack tool)
+ (debug, Rack load)
 o141 endif
 
-; Check if selected tool has no offset
+; Check offset mode that applies
+  ; Use off rack unload setting when tool exceeds slot size or if the rack is removed
+  ; Use in rack setting otherwise
   ; when not in probe mode,
   ; when empty tool is not selected, 
-  ; When probe new offset every timeis not enforced
+  ; When probe new offset every time is not enforced
 
-o142 if [#<unload_mode> EQ 0]
-  #<unload_offset_mode> = #<_irt_offset_mode>
-o142 elseif [#<unload_mode> EQ 1]
+o160 if [#<_current_tool> GT #<_tc_slots> OR #<passthrough> EQ 1]
   #<unload_offset_mode> = #<_ort_offset_mode>
-o142 endif
+o160 elseif [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> NE 0]
+  #<unload_offset_mode> = #<_irt_offset_mode>
+o160 endif
 
-o150 if [#<load_mode> EQ 0]
-  #<load_offset_mode> = #<_irt_offset_mode>
-o150 elseif [#<load_mode> EQ 1]
+o161 if [#<_selected_tool> GT #<_tc_slots> OR #<passthrough> EQ 1]
   #<load_offset_mode> = #<_ort_offset_mode>
-o150 endif
+o161 elseif [#<_selected_tool> LE #<_tc_slots> AND #<_selected_tool> NE 0]
+  #<load_offset_mode> = #<_irt_offset_mode>
+o161 endif
 
-o160 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
+o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   G65P2Q[#<_selected_tool>]R2
-  o161 if [#<_value> EQ 0]
-    (print, ATCI:0|Tool has no offset and my not exist in holder|"Resume" to initialize the tool and continue, "Reset" if the slot is empty or if you have made an incorrect selection)
+  o171 if [#<_value> EQ 0]
+    (print, ATCI:0|Tool #<_selected_tool> has no offset and my not exist in holder|"Resume" to initialize the tool and continue, "Reset" if the slot is empty or if you have made an incorrect selection)
     M0
     #<load_offset_mode> = 0
-  o161 endif
-o160 endif
+  o171 endif
+o170 endif
 
 ; ************ END VALIDATION ************
 
@@ -157,7 +181,40 @@ o500 if [#<unload_mode> EQ 0]
     #<tc_x_unload> = [[[#<_current_tool> - 1] * #<_tc_slot_offset>] + #<_tc_slot_one_x>]
     #<tc_y_unload> = #<_tc_slot_one_y>
 
+    ;Move to staging position for tool unload
     G53 G0 X[#<tc_x_unload>] Y[#<_tc_y_pulloff>]
+
+    ;Tool holder check
+    o510 if [#<_holder_sense> EQ 1]
+      (debug, Checking tool presence for collision)
+      G53 G0 Y[#<tc_y_unload> + #<_tc_holder_sense_offset_y>]
+      G53 G0 Z[#<_tc_load_z> + #<_tc_holder_sense_offset_z> + #<_tc_holder_sense_seek_z>]
+      
+      #<current_probed_distance> = 0;
+      o511 do
+          M66 P0 L3 Q0.01
+          G1 G91 Z-0.1 F100
+          G90
+          #<current_probed_distance> = [#<current_probed_distance> + 0.1]
+          G4P0
+          (debug,#<current_probed_distance> #<_tc_holder_sense_seek_z>)
+          ;Added a 0.1 since there seems to be some caching issue with the loop.
+      o511 while [[#5399] NE -1 AND #<current_probed_distance> LT [#<_tc_holder_sense_seek_z>-0.1]]
+
+      o512 if [#<current_probed_distance> EQ #<_tc_holder_sense_seek_z>]
+        (debug, No tool in tool holder, safe to unload current tool.)
+      o512 else
+        G53 G0 Z[#<_tc_safe_z>]
+        G53 G0 Y[#<_tc_y_pulloff>]
+       (abort, ATCI:1|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again)
+      o512 endif
+      #<current_probe_offset> = 0;
+
+      G53 G0 Z[#<_tc_safe_z>]
+      G53 G0 Y[#<_tc_y_pulloff>]
+    o510 endif
+
+
     G53 G0 Z[#<_tc_load_z>]
     G53 G1 Y[#<tc_y_unload>] F[#<_tc_y_pulloff_feed>]
     G4 P0.5
@@ -168,14 +225,14 @@ o500 if [#<unload_mode> EQ 0]
     G4P0.8
     ; Verify drawbar release
     M66 P[#<_tc_input_db>] L4 Q0.5
-    o310 if [[#5399] EQ -1]
+    o520 if [[#5399] EQ -1]
       ;Close drawbar on error
       M65 P[#<_tc_output_db>]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
       G53 G0 Z[#<_tc_safe_z>]
       G4P0
       (abort, ATCI:1|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
-    o310 endif
+    o520 endif
 
     ; Move away from tool rack
     G4 P0.2
@@ -187,9 +244,9 @@ o500 if [#<unload_mode> EQ 0]
 
     ; Check if tool is unloaded
     M66 P[#<_tc_input_tis>] L3 Q0.5
-    o510 if [[#5399] EQ -1]
+    o530 if [[#5399] EQ -1]
       (abort, ATCI:1|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage. - May chain on safe position unload recovery procedure in the future.)
-    o510 endif
+    o530 endif
 
     ; Move to safe height
     G53 G0 Z[#<_tc_safe_z>]
@@ -204,7 +261,7 @@ o500 elseif [#<unload_mode> EQ 1]
     G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
 
     ; Pause as long as the tool is not removed
-    o520 do
+    o540 do
       G4P0
       (print, ATCI:0|Action Required|Remove off rack tool using the drawbar button)
       G4P0
@@ -212,7 +269,7 @@ o500 elseif [#<unload_mode> EQ 1]
       M0
       M66 P[#<_tc_input_tis>] L3 Q0.05
       G4P0.1
-    o520 while [[#5399] EQ -1]
+    o540 while [[#5399] EQ -1]
     M65 P[#<_tc_output_bt>]
 o500 else
 (debug, Unload skipped)
@@ -337,12 +394,13 @@ o800 if [#<probing> EQ 0 AND #<load_mode> NE -1]
   ; If offset mode is 2, check
 
   o810 if [#<load_offset_mode> EQ 0]
-    G65P500    
+    G65P500Q0
+    
   o810 elseif [#<load_offset_mode> EQ 2]
     G65P500Q1
   o810 endif
 o800 endif
 ; ************ END TOOL LENGTH MANAGEMENT (LOAD) ************
 
-
-M99
+(debug, End tool change macro)
+M99;
