@@ -1,17 +1,18 @@
-; This is a helper function to display current output status
+; This is a helper function to check air pressure
 
-(debug, Running helper function P503 for pin status display)
+(debug, Running helper function P501 for pressure checking)
 
-#<max_cycle> = 100
-#<movement_per_cycle> = -0.1
-#<current_cycle> = 0
-
-
-o100 do
-    M66 P0 L3 Q0.01
-    G1 G91 Z[#<movement_per_cycle>] F100
+o100 if [#<_pres_sense> EQ 1]
+  M66 P2 L3 Q0.01
+  G4P0.1
+  o101 while [#5399 EQ -1]
     G4P0
-    #<current_cycle> = [#<current_cycle> + 1]
-    (debug, Cycle #<current_cycle>)
-o100 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
+    (print, ATCI:0|Action Required|Insufficient air pressure, increase or supply compressed air to the spindle to continue.)
+    G4P0
+    M0
+    M66 P2 L3 Q0.01
+    G4P0.1
+  o101 endwhile
+o100 endif
 
+M99;

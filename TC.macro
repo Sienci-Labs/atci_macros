@@ -19,7 +19,7 @@
 #<passthrough> = 1;
 #<unload_offset_mode> = 0
 #<load_offset_mode> = 0
-#<selected_tool_cache> = 0; Caching selected tool variable as M61 will clear this variable when changing current tool to 0 between tool unload and tool load.
+#<selected_tool_cache> = #<_selected_tool>; Caching selected tool variable as M61 will clear this variable when changing current tool to 0 between tool unload and tool load.
 
 ; ************ BEGIN VALIDATION ************
 ;Check homed state
@@ -32,33 +32,15 @@ o110 if [#1001 NE 1]
   (abort, ATCI:1|Tool changer not initialized|Initialize the tool changer to continue)
 o110 endif
 
-; Check rack sync
-M66 P[#<_tc_input_tis>] L4 Q0.5
-o120 if [[#5399] EQ -1]
-  o121 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
-    (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
-    M61 Q[#<_empty_tool>]
-    M0
-  o121 endif
-o120 else
-  o122 if [#<_current_tool> EQ 0]
-      (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
-      M0
-      G53 G0 Z[#<_tc_safe_z>]
-      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
-    ; Move to off rack tool load / unload position
-    o123 do
-      G4P0
-      (print, ATCI:0|Action Required|Remove tool using the drawbar button)
-      G4P0
-      M62 P[#<_tc_output_bt>]
-      M0
-      M66 P[#<_tc_input_tis>] L3 Q0.05
-      G4P0.1
-    o123 while [[#5399] EQ -1]
-    M65 P[#<_tc_output_bt>]
-  o122 endif
-o120 endif
+;Check pressure with helper function
+G65P501
+
+; Check rack sync with helper function
+; TODO migrate to later in the program after position / modals have been recorded
+; TODO fix scenario where there is a mismatch and current tool is prematurely assigned
+(debug, #<_current_tool>, #<selected_tool_cache>)
+G65P502
+(debug, #<_current_tool>, #<selected_tool_cache>)
 
 ; Check if tool changing as part of a probe cycle
 ; TODO: Move earlier to reset these settings and prevent them from caching if the above checks fail.
@@ -82,7 +64,7 @@ o132 if [#1004 EQ 1]
   #<force_manual_load> = 1
 o132 endif
 
-; Check if pin goes high which indicate rack is present and we can disable passthrough.
+; Check rack presence
 M66 P3 L3 Q0.01
 o133 if [#5399 NE -1]
   #<passthrough> = 0;
@@ -100,10 +82,10 @@ o140 else
 o140 endif
 
 ; Check if tool load should be skipped and if it should be loaded manually 
-o141 if [#<_selected_tool> EQ #<_empty_tool>]
+o141 if [#<selected_tool_cache> EQ #<_empty_tool>]
   #<load_mode> = -1
   (debug, Load skipped)
-o141 elseif [#<_selected_tool> GT #<_tc_slots> OR #<force_manual_load> EQ 1 OR #<passthrough> EQ 1]
+o141 elseif [#<selected_tool_cache> GT #<_tc_slots> OR #<force_manual_load> EQ 1 OR #<passthrough> EQ 1]
   #<load_mode> = 1
   (debug, Manual load)
 o141 else
@@ -123,20 +105,21 @@ o160 elseif [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> NE 0]
   #<unload_offset_mode> = #<_irt_offset_mode>
 o160 endif
 
-o161 if [#<_selected_tool> GT #<_tc_slots> OR #<passthrough> EQ 1]
+o161 if [#<selected_tool_cache> GT #<_tc_slots> OR #<passthrough> EQ 1]
   #<load_offset_mode> = #<_ort_offset_mode>
-o161 elseif [#<_selected_tool> LE #<_tc_slots> AND #<_selected_tool> NE 0]
+o161 elseif [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> NE 0]
   #<load_offset_mode> = #<_irt_offset_mode>
 o161 endif
 
 o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
-  G65P2Q[#<_selected_tool>]R2
+  G65P2Q[#<selected_tool_cache>]R2
   o171 if [#<_value> EQ 0]
-    (print, ATCI:0|Tool #<_selected_tool> has no offset and my not exist in holder|"Resume" to initialize the tool and continue, "Reset" if the slot is empty or if you have made an incorrect selection)
+    (print, ATCI:0|Tool #<selected_tool_cache> has no offset and my not exist in holder|"Resume" to initialize the tool and continue, "Reset" if the slot is empty or if you have made an incorrect selection)
     M0
     #<load_offset_mode> = 0
   o171 endif
 o170 endif
+
 
 ; ************ END VALIDATION ************
 
@@ -148,7 +131,6 @@ M9
 (debug, Spindle and coolant turned off)
 
 ; Check if spindle is turned off
-
 
 ; Record current units
 o210 if [#<_metric> EQ 0]
@@ -162,6 +144,9 @@ o210 endif
 G21 G90
 (debug, Change to metric mode)
 
+; Record starting position
+
+
 ; TODO, Restore home position
 ; TODO, Offset defined safe position
 
@@ -172,8 +157,7 @@ G21 G90
 
 o500 if [#<unload_mode> EQ 0]
   (debug, Unloading in rack tool)
-  ; ************ MOTION BLOCK - UNLOAD ON RACK TOOL ************
-    ;TODO Break out into separate macro
+  ; ************ MOTION BLOCK - UNLOAD IN RACK TOOL ************
     G53 G0 Z[#<_tc_safe_z>]
     G53 G0 X[#<_tc_measure_x>]
     G53 G0 Y[#<_tc_y_pulloff>]
@@ -184,7 +168,7 @@ o500 if [#<unload_mode> EQ 0]
     ;Move to staging position for tool unload
     G53 G0 X[#<tc_x_unload>] Y[#<_tc_y_pulloff>]
 
-    ;Tool holder check
+    ; Tool holder check
     o510 if [#<_holder_sense> EQ 1]
       (debug, Checking tool presence for collision)
       G53 G0 Y[#<tc_y_unload> + #<_tc_holder_sense_offset_y>]
@@ -214,7 +198,7 @@ o500 if [#<unload_mode> EQ 0]
       G53 G0 Y[#<_tc_y_pulloff>]
     o510 endif
 
-
+    ; Move to tool change location
     G53 G0 Z[#<_tc_load_z>]
     G53 G1 Y[#<tc_y_unload>] F[#<_tc_y_pulloff_feed>]
     G4 P0.5
@@ -288,7 +272,6 @@ o600 if [#<probing> EQ 0 AND #<unload_mode> NE -1 AND #<unload_offset_mode> EQ 0
   G10 L1 P[#<_current_tool>] Z0
 o600 endif
 
-#<selected_tool_cache> = [#<_selected_tool>]
 M61 Q[#<_empty_tool>]
 G4P0
 G49

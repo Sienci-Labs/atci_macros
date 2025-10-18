@@ -138,8 +138,6 @@ o102 endif
 
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
-#<_holder_sense> = 1;
-
 o103 if [[EXISTS[#<_holder_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
 o103 endif
@@ -155,6 +153,13 @@ o103 endif
 
 #<_tc_holder_sense_seek_z> = 8;
 (debug, Slot Offset: #<_tc_holder_sense_seek_z>)
+
+; ******** PRESSURE SENSOR CONTROL ********
+
+o104 if [[EXISTS[#<_pres_sense>]] EQ 0]
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
+o104 endif
+(debug, Pressure Sensor: #<_pres_sense>)
 
 ; ******** SYSTEM VARIABLES ********
 ; Assign tool 0 as empty

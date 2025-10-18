@@ -1,62 +1,31 @@
-; This is a helper function to display current output status
+; This is a helper function to check rack sync
 
-(debug, Running helper function P503 for pin status display)
+(debug, Running helper function P502 for checking tool number - spindle synchronization)
 
-#<max_cycle> = 500
-#<movement_per_cycle> = 0.1
-#<current_cycle> = 0
-#<x_min> = 0
-#<x_max> = 0
+M66 P[#<_tc_input_tis>] L4 Q0.5
+o100 if [[#5399] EQ -1]
+  o101 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
+    M61 Q[#<_empty_tool>]
+    M0
+  o101 endif
+o100 else
+  o102 if [#<_current_tool> EQ 0]
+      (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
+      M0
+      G53 G0 Z[#<_tc_safe_z>]
+      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+    ; Move to off rack tool load / unload position
+    o103 do
+      (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+      G4P0
+      M64 P[#<_tc_output_bt>]
+      M0
+      M66 P[#<_tc_input_tis>] L3 Q0.05
+      G4P0.1
+    o103 while [[#5399] EQ -1]
+    M65 P[#<_tc_output_bt>]
+  o102 endif
+o100 endif
 
-#<y_min> = 0
-#<y_max> = 0
-
-o100 do
-    M66 P0 L3 Q0.01
-    G1 G91 X[#<movement_per_cycle>] F100
-    G4P0
-    #<current_cycle> = [#<current_cycle> + 1]
-    (debug, Cycle #<current_cycle>)
-o100 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
-
-#<x_min> = #5420
-G0G91X12
-G4P0
-#<current_cycle> = 0
-
-o101 do
-    M66 P0 L3 Q0.01
-    G1 G91 X[-1 * [#<movement_per_cycle>]] F100
-    G4P0
-    #<current_cycle> = [#<current_cycle> + 1]
-    (debug, Cycle #<current_cycle>)
-o101 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
-#<x_max> = #5420
-(debug, x min is #<x_min> and x max is #<x_max>)
-G0G91X[[#<x_min> - #<x_max>]/2]
-G0G91Y-1.5
-#<current_cycle> = 0
-o102 do
-    M66 P0 L3 Q0.01
-    G1 G91 Y[#<movement_per_cycle>] F100
-    G4P0
-    #<current_cycle> = [#<current_cycle> + 1]
-    (debug, Cycle #<current_cycle>)
-o102 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
-
-#<y_min> = #5421
-G0G91Y12
-G4P0
-#<current_cycle> = 0
-
-o103 do
-    M66 P0 L3 Q0.01
-    G1 G91 Y[-1 * [#<movement_per_cycle>]] F100
-    G4P0
-    #<current_cycle> = [#<current_cycle> + 1]
-    (debug, Cycle #<current_cycle>)
-o103 while [[#5399] NE -1 AND #<current_cycle> LT #<max_cycle>]
-#<y_max> = #5421
-(debug, y min is #<y_min> and xymax is #<y_max>)
-G0G91Y[[#<y_min> - #<y_max>]/2]
-
+M99;

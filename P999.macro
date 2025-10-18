@@ -27,7 +27,6 @@ $485 = 1;       Keep tool number over reboot
 $675 = 3;       Execute M6T0 and Fail M6 if tc.macro is not found
 ; xxxxxxxx PIN CONFIG xxxxxxxx
 G65P1Q370;
-o100 if [_value]
 (debug, 370 #<_value>)
 G65P1Q372;
 (debug, 372 #<_value>)
