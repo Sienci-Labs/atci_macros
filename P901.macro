@@ -1,6 +1,8 @@
 ; P901 Load tool at spindle nose
 (debug, Running P900 - Load tool at spindle nose)
 
+; All Validation handled by TC.macro
+
 ; ************ VARIABLES ************
 #<selected_tool_cache> = #17;
 

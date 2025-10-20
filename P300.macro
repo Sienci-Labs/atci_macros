@@ -19,33 +19,44 @@ o110 if [#1001 NE 1]
   M0
   M99
 o110 endif
+; ************ PAUSE VALIDATION ************
 
-; Check rack sync
-; Will also be able to catch people who removed their tool pre-maturely.
-M66 P[#<_tc_input_tis>] L4 Q0.5
-o120 if [[#5399] EQ -1]
-  o121 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
-    (debug, TOOL CHANGER ERROR - No tool in spindle, but tool number #<_current_tool> is active. Tool number cleared.)
-    M61 Q[#<_empty_tool>]
-    M0
-  o121 endif
-o120 else
-  o122 if [#<_current_tool> EQ 0]
-      (debug, TOOL CHANGER ERROR - Unknown tool in spindle. Resume to move to safe position and unload tool.)
-      M0
-      G53 G0 Z[#<_tc_safe_z>]
-      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
-    ; Move to off rack tool load / unload position
-    o123 do
-      (debug, Remove tool using the drawbar button)
-      M0
-      M66 P[#<_tc_input_tis>] L3 Q0.05
-      G4P0.1
-    o123 while [[#5399] EQ -1]
-  o122 endif
-o120 endif
+; ************ BEGIN SETUP ************
 
-; ************ END VALIDATION ************
+; Turn off spindle and coolant
+M5
+M9
+(debug, Spindle and coolant turned off)
+
+; Record current units
+o210 if [#<_metric> EQ 0]
+  #<_tc_return_units_300> = 20
+o210 else
+  #<_tc_return_units_300> = 21
+o210 endif
+(debug, Units recorded)
+
+; Force metric
+G21 G90
+(debug, Change to metric mode)
+
+; Record starting position
+#<_tc_start_x_300> =  #5420
+#<_tc_start_y_300> =  #5421
+#<_tc_start_z_300> = #5422
+(debug, Position before tool change: #<_tc_start_x_300>, #<_tc_start_y_300>, #<_tc_start_z_300>)
+
+(debug, Moved to safe position)
+; *************** END SETUP ****************
+
+; *************** CONTINUE VALIDATION ****************
+; Movements based validation
+;Check pressure with helper function
+G65P501
+
+; Check rack sync with helper function
+G65P502
+; *************** END VALIDATION ****************
 
 ; ************ BEGIN TOOL CHANGE ************
 o200 while [#<_current_slot> LE #<_tc_slots>]
@@ -64,5 +75,23 @@ o200 while [#<_current_slot> LE #<_tc_slots>]
     G53 G0 Z[#<_tc_safe_z>]
     #<_current_slot> = [#<_current_slot> + 1]
 o200 endwhile
+
+; Empty the spindle nose
+M6T0;
+
+; ************ BEGIN RESTORE MODAL ************
+; xxxxxxxx RESTORE POSITION xxxxxxxx
+; Move to safe Z
+G0 G53 Z[#<_tc_safe_z>]
+; Restore original position
+(debug, Reapplying start coordinates #<_tc_start_x_300>, #<_tc_start_y_300>)
+G0 Y[#<_tc_start_y_300>]
+G0 X[#<_tc_start_x_300>]
+
+; xxxxxxxx RESTORE UNITS xxxxxxxx
+(debug, Reapplying units #<_tc_return_units_300>)
+G[#<_tc_return_units_300>]
+
+; ************ END RESTORE MODAL ************
 
 M99;

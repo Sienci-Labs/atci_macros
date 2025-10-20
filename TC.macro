@@ -32,18 +32,7 @@ o110 if [#1001 NE 1]
   (abort, ATCI:1|Tool changer not initialized|Initialize the tool changer to continue)
 o110 endif
 
-;Check pressure with helper function
-G65P501
-
-; Check rack sync with helper function
-; TODO migrate to later in the program after position / modals have been recorded
-; TODO fix scenario where there is a mismatch and current tool is prematurely assigned
-(debug, #<_current_tool>, #<selected_tool_cache>)
-G65P502
-(debug, #<_current_tool>, #<selected_tool_cache>)
-
 ; Check if tool changing as part of a probe cycle
-; TODO: Move earlier to reset these settings and prevent them from caching if the above checks fail.
 o130 if [#1002 EQ 1]
   (debug, Mode: Probing)
   #1002 = 0
@@ -52,12 +41,14 @@ o130 else
   (debug, Mode: Normal)
 o130 endif
 
+; Check if tool unload is to be performed manually regardless of rack status
 o131 if [#1003 EQ 1]
   (debug, Forced Manual Tool Unload)
   #1003 = 0
   #<force_manual_unload> = 1
 o131 endif
 
+; Check if tool load is to be performed manually regardless of rack status
 o132 if [#1004 EQ 1]
   (debug, Forced Manual Tool Load)
   #1004 = 0
@@ -70,7 +61,7 @@ o133 if [#5399 NE -1]
   #<passthrough> = 0;
 o133 endif
 
-; Check if tool unload should be skipped
+; Check if tool unload should be skipped because an empty tool is selected, or if passthrough mode is on, or if forcing a manual unload
 o140 if [#<_current_tool> EQ #<_empty_tool>]
   #<unload_mode> = -1
   (debug, Unload skipped)
@@ -81,7 +72,7 @@ o140 else
   (debug, Rack unload)
 o140 endif
 
-; Check if tool load should be skipped and if it should be loaded manually 
+; Check if tool load should be skipped because an empty tool is selected, or if passthrough mode is on, or if forcing a manual load
 o141 if [#<selected_tool_cache> EQ #<_empty_tool>]
   #<load_mode> = -1
   (debug, Load skipped)
@@ -111,6 +102,7 @@ o161 elseif [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> N
   #<load_offset_mode> = #<_irt_offset_mode>
 o161 endif
 
+;Force probing when user selected a tool without an offset
 o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   G65P2Q[#<selected_tool_cache>]R2
   o171 if [#<_value> EQ 0]
@@ -120,8 +112,7 @@ o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   o171 endif
 o170 endif
 
-
-; ************ END VALIDATION ************
+; ************ PAUSE VALIDATION ************
 
 ; ************ BEGIN SETUP ************
 
@@ -130,7 +121,13 @@ M5
 M9
 (debug, Spindle and coolant turned off)
 
-; Check if spindle is turned off
+; Record current units
+o210 if [#<_metric> EQ 0]
+  #<_tc_return_units> = 20
+o210 else
+  #<_tc_return_units> = 21
+o210 endif
+(debug, Units recorded)
 
 ; Record current units
 o210 if [#<_metric> EQ 0]
@@ -145,13 +142,23 @@ G21 G90
 (debug, Change to metric mode)
 
 ; Record starting position
-
-
-; TODO, Restore home position
-; TODO, Offset defined safe position
+#<tc_start_x> =  #5420
+#<tc_start_y> =  #5421
+#<tc_start_z> = #5422
+(debug, Position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
 
 (debug, Moved to safe position)
 ; *************** END SETUP ****************
+
+; *************** CONTINUE VALIDATION ****************
+; Movements based validation
+;Check pressure with helper function
+G65P501
+
+; Check rack sync with helper function
+G65P502
+; *************** END VALIDATION ****************
+
 
 ; ************ BEGIN UNLOAD ************
 
@@ -181,7 +188,6 @@ o500 if [#<unload_mode> EQ 0]
           G90
           #<current_probed_distance> = [#<current_probed_distance> + 0.1]
           G4P0
-          (debug,#<current_probed_distance> #<_tc_holder_sense_seek_z>)
           ;Added a 0.1 since there seems to be some caching issue with the loop.
       o511 while [[#5399] NE -1 AND #<current_probed_distance> LT [#<_tc_holder_sense_seek_z>-0.1]]
 
@@ -331,6 +337,7 @@ o700 if [#<load_mode> EQ 0]
     G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
     G53 G0 Z[#<_tc_safe_z>]
     G53 G0 X[#<_tc_measure_x>]
+    G53 G0 Y[#<_tc_measure_y>]
   o720 endif
 
 o700 elseif [#<load_mode> EQ 1]
@@ -384,6 +391,25 @@ o800 if [#<probing> EQ 0 AND #<load_mode> NE -1]
   o810 endif
 o800 endif
 ; ************ END TOOL LENGTH MANAGEMENT (LOAD) ************
+
+; ************ BEGIN RESTORE MODAL ************
+
+; xxxxxxxx RESTORE POSITION xxxxxxxx
+;Ignore when M6 is triggered as part of a probing cycle
+o900 if [#<probing> EQ 0]
+  ; Move to safe Z
+  G0 G53 Z[#<_tc_safe_z>]
+  ; Restore original position
+  G0 Y[#<tc_start_y>]
+  G0 X[#<tc_start_x>]
+o900 endif
+
+; xxxxxxxx RESTORE UNITS xxxxxxxx
+G[#<_tc_return_units>]
+(debug, Reapplying units #<_tc_return_units>)
+
+; ************ END RESTORE MODAL ************
+
 
 (debug, End tool change macro)
 M99;

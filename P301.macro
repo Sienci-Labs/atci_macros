@@ -5,7 +5,7 @@
 
 
 ; Local variables
-#<_tool_chache> = #17;
+#<_tool_cache_301> = #17;
 
 ; ************ BEGIN VALIDATION ************
 ;Check homed state
@@ -20,49 +20,71 @@ o110 if [#1001 NE 1]
   M99
 o110 endif
 
-; Check rack sync
-; Will also be able to catch people who removed their tool pre-maturely.
-M66 P[#<_tc_input_tis>] L4 Q0.5
-o120 if [[#5399] EQ -1]
-  o121 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
-    (debug, TOOL CHANGER ERROR - No tool in spindle, but tool number #<_current_tool> is active. Tool number cleared.)
-    M61 Q[#<_empty_tool>]
-    M0
-  o121 endif
-o120 else
-  o122 if [#<_current_tool> EQ 0]
-      (debug, TOOL CHANGER ERROR - Unknown tool in spindle. Resume to move to safe position and unload tool.)
-      M0
-      G53 G0 Z[#<_tc_safe_z>]
-      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
-    ; Move to off rack tool load / unload position
-    o123 do
-      (debug, Remove tool using the drawbar button)
-      M0
-      M66 P[#<_tc_input_tis>] L3 Q0.05
-      G4P0.1
-    o123 while [[#5399] EQ -1]
-  o122 endif
-o120 endif
-
-o130 if [#<_tool_chache> LE 0 OR #<_tool_chache> GT #<_tc_table_size>] 
+o130 if [#<_tool_cache_301> LE 0 OR #<_tool_cache_301> GT #<_tc_table_size>] 
     (abort, Invalid tool number)
 o130 endif
-; ************ END VALIDATION ************
+; ************ PAUSE VALIDATION ************
+
+; ************ BEGIN SETUP ************
+
+; Turn off spindle and coolant
+M5
+M9
+(debug, Spindle and coolant turned off)
+
+; Record current units
+o210 if [#<_metric> EQ 0]
+  #<_tc_return_units_301> = 20
+o210 else
+  #<_tc_return_units_301> = 21
+o210 endif
+(debug, Units recorded)
+
+; Force metric
+G21 G90
+(debug, Change to metric mode)
+
+; Record starting position
+#<_tc_start_x_301> =  #5420
+#<_tc_start_y_301> =  #5421
+#<_tc_start_z_301> = #5422
+(debug, Position before tool change: #<_tc_start_x_301>, #<_tc_start_y_301>, #<_tc_start_z_301>)
+
+(debug, Moved to safe position)
+; *************** END SETUP ****************
+
+; *************** CONTINUE VALIDATION ****************
+; Movements based validation
+
+; Check rack sync with helper function
+G65P502
+; *************** END VALIDATION ****************
 
 ; ************ BEGIN TOOL CHANGE ************
 #1002 = 1
-M6T[#<_tool_chache>]
+M6T[#<_tool_cache_301>]
 (debug, Tool Change Complete)
-o200 if [#<_current_tool> EQ #<_tool_chache>]
+o200 if [#<_current_tool> EQ #<_tool_cache_301>]
     (debug, tool change successful, probing current tool)
     G65P500
 o200 else
     (debug, tool change unsuccessful, offset cleared)
-    G10 L1 P[#<_tool_chache>] Z0
+    G10 L1 P[#<_tool_cache_301>] Z0
 o200 endif
 
-; Move to safe height
-G53 G0 Z[#<_tc_safe_z>]
+; ************ BEGIN RESTORE MODAL ************
+; xxxxxxxx RESTORE POSITION xxxxxxxx
+; Move to safe Z
+G0 G53 Z[#<_tc_safe_z>]
+; Restore original position
+(debug, Reapplying start coordinates #<_tc_start_x_301>, #<_tc_start_y_301>)
+G0 Y[#<_tc_start_y_301>]
+G0 X[#<_tc_start_x_301>]
+
+; xxxxxxxx RESTORE UNITS xxxxxxxx
+(debug, Reapplying units #<_tc_return_units_301>)
+G[#<_tc_return_units_301>]
+
+; ************ END RESTORE MODAL ************
 
 M99;
