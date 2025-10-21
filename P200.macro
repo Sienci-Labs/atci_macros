@@ -105,6 +105,10 @@ o102 endif
 #<_tc_input_tis> = 1
 (debug, Tool in spindle sensor at pin #<_tc_input_tis>)
 
+; The input pin for the rack sensor
+#<_tc_input_rack> = 3
+(debug, Rack presence sensor at pin #<_tc_input_rack>)
+
 ; ******** TOOL LENGTH PROBE CONTROL ********
 ; X and Y machine coordinate positions of the tool setter.
 #<_tc_measure_x> = #5381

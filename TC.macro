@@ -56,7 +56,7 @@ o132 if [#1004 EQ 1]
 o132 endif
 
 ; Check rack presence
-M66 P3 L3 Q0.01
+M66 P3 L[#<_tc_input_rack>] Q0.01
 o133 if [#5399 NE -1]
   #<passthrough> = 0;
 o133 endif
@@ -330,7 +330,7 @@ o700 if [#<load_mode> EQ 0]
       #<selected_tool_cache> = #<_empty_tool>
     o721 else
       G53 G0 Z[#<_tc_safe_z>]
-      (abort, ATCI1|Tool #<selected_tool_cache> not loaded, tool holder not in rack or is out of reach by the spindle. Place tool into tool rack to continue.)
+      (abort, ATCI:1|Tool #<selected_tool_cache> not loaded, tool holder not in rack or is out of reach by the spindle. Place tool into tool rack to continue.)
     o721 endif
   o720 else
     ;Tool change is successful, pulloff
