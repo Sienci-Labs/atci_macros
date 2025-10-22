@@ -3,7 +3,9 @@
 ; ******** BASIC SETUP ********
 
 ; The number of slots in your magazine. Defined in P100.macro, will abort if not defined.
+
 ;#<_tc_slots> = 6; Enable for Ad-hoc definition.
+
 o100 if [[EXISTS[#<_tc_slots>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slots", rerun ATC setup and try again)
 o100 endif

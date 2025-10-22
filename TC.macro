@@ -399,9 +399,14 @@ o800 endif
 o900 if [#<probing> EQ 0]
   ; Move to safe Z
   G0 G53 Z[#<_tc_safe_z>]
+  ; Go to safe position (assume TLS - 150)
+  G0 G53 X[#<_tc_measure_x>]
+  G0 G53 Y[#<_tc_measure_y> - 150]
+
   ; Restore original position
-  G0 Y[#<tc_start_y>]
   G0 X[#<tc_start_x>]
+  G0 Y[#<tc_start_y>]
+
 o900 endif
 
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
