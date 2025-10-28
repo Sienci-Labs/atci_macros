@@ -58,6 +58,16 @@ G65P501
 G65P502
 ; *************** END VALIDATION ****************
 
+; *************** STAGING ****************
+
+;Move to safe position
+(debug, Moving to safe position)
+G0 G53 Z[#<_tc_safe_z>]
+G0 G53 Y[#<_tc_safe_y>]
+G0 G53 X[#<_tc_safe_x>]
+
+; *************** END STAGING ****************
+
 ; ************ BEGIN TOOL CHANGE ************
 o200 while [#<_current_slot> LE #<_tc_slots>]
     #1002 = 1;
@@ -83,10 +93,9 @@ M6T0;
 ; xxxxxxxx RESTORE POSITION xxxxxxxx
 ; Move to safe Z
 G0 G53 Z[#<_tc_safe_z>]
-; Restore original position
-(debug, Reapplying start coordinates #<_tc_start_x_300>, #<_tc_start_y_300>)
-G0 Y[#<_tc_start_y_300>]
-G0 X[#<_tc_start_x_300>]
+; Go to safe position
+G0 G53 X[#<_tc_safe_x>]
+G0 G53 Y[#<_tc_safe_y>]
 
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 (debug, Reapplying units #<_tc_return_units_300>)

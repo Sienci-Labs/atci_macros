@@ -44,7 +44,7 @@ o210 endif
 G21 G90
 (debug, Change to metric mode)
 
-; Record starting position
+; Record starting position, this process need to be done here since restore position is disabled in TC.macro as part of probe mode.
 #<_tc_start_x_301> =  #5420
 #<_tc_start_y_301> =  #5421
 #<_tc_start_z_301> = #5422
@@ -59,6 +59,16 @@ G21 G90
 ; Check rack sync with helper function
 G65P502
 ; *************** END VALIDATION ****************
+
+; *************** STAGING ****************
+
+;Move to safe position
+(debug, Moving to safe position)
+G0 G53 Z[#<_tc_safe_z>]
+G0 G53 Y[#<_tc_safe_y>]
+G0 G53 X[#<_tc_safe_x>]
+
+; *************** END STAGING ****************
 
 ; ************ BEGIN TOOL CHANGE ************
 #1002 = 1
@@ -76,7 +86,10 @@ o200 endif
 ; xxxxxxxx RESTORE POSITION xxxxxxxx
 ; Move to safe Z
 G0 G53 Z[#<_tc_safe_z>]
-; Restore original position
+; Go to safe position
+G0 G53 X[#<_tc_safe_x>]
+G0 G53 Y[#<_tc_safe_y>]
+
 (debug, Reapplying start coordinates #<_tc_start_x_301>, #<_tc_start_y_301>)
 G0 Y[#<_tc_start_y_301>]
 G0 X[#<_tc_start_x_301>]

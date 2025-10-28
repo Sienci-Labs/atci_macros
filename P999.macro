@@ -5,7 +5,7 @@
 ; ******** SPINDLE SETTINGS ********
 (print, Applying spindle settings)
 $395 = 2;       Default spindle is H100*
-$30 = 23999;    Max RPM*
+$30 = 24000;    Max RPM*
 $31 = 7500;     Min RPM*
 
 $340 = 5;       Spindle at speed tolerance (percentage)*

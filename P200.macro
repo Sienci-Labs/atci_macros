@@ -44,17 +44,23 @@ o101 endif
 ; Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
-(debug, Slot Offset: #<_tc_slot_offset>)
-
 o102 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
 o102 endif
+(debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
 #<_tc_off_rack_x> = #5361
 (debug, Off rack X: #<_tc_off_rack_x>, from G59.2)
 #<_tc_off_rack_y> = #5362
 (debug, Off rack Y: #<_tc_off_rack_y>, from G59.2)
+
+; The X and Y machine coordinate positions for safely entering and exiting the keepout area
+; TODO Refine the actual position
+
+#<_tc_safe_x> = #5381 ; X coordinate should be identical to the TLS
+#<_tc_safe_y> = -300 
+(debug, Safe Position: X#<_tc_safe_x> Y#<_tc_safe_y>)
 
 ; The Y machine coordinate positon for Y-axis pulloff.
 #<_tc_y_pulloff> = [#<_tc_slot_one_y> + 44]
@@ -63,6 +69,11 @@ o102 endif
 ; The feedrate for Y-axis pulloff.
 #<_tc_y_pulloff_feed> = 1000
 (debug, Pulloff Y Feedrate: #<_tc_y_pulloff_feed>)
+
+; ******** Keepout ********
+; The X and Y machine coordinate positions of slot 1.
+#<shoe_width> = 120
+#<keepout_depth> = 100
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
@@ -81,7 +92,7 @@ o102 endif
 #<_tc_safe_z> = 0
 (debug, Safe Clearance Z: #<_tc_safe_z>)
 
-; ******** DRAWBAR CONTROL ********
+; ******** IO CONTROL ********
 
 ; The output pin for the drawbar
 #<_tc_output_db> = 1

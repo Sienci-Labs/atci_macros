@@ -56,10 +56,27 @@ o132 if [#1004 EQ 1]
 o132 endif
 
 ; Check rack presence
-M66 P3 L[#<_tc_input_rack>] Q0.01
+M66 P[#<_tc_input_rack>] L3 Q0.01
 o133 if [#5399 NE -1]
+  ; Rack present
   #<passthrough> = 0;
+o133 else
+  ; Rack not present
+  #<passthrough> = 1;
 o133 endif
+
+; Check if keepout should be disabled / enabled
+; Should setup a global flag to indicate if keepout should be maintained for this session
+; a separate helper function can be called to enable and disable the keepout bearing this global flag in mind;
+; For example, keepout should typically be enabled when entering the rack area, but this should be overridden if the global flag is false
+; Alternatively, keepout should be re-enabled when exiting the rack area, but again this should be overridden if the global flag
+o134 if [#<probing> EQ 0 AND #<passthrough> EQ 0]
+  ;M810 P1;
+  (print, Keepout enabled)
+o134 else
+  ;M810 P0;
+  (print, Keepout disabled)
+o134 endif
 
 ; Check if tool unload should be skipped because an empty tool is selected, or if passthrough mode is on, or if forcing a manual unload
 o140 if [#<_current_tool> EQ #<_empty_tool>]
@@ -130,11 +147,11 @@ o210 endif
 (debug, Units recorded)
 
 ; Record current units
-o210 if [#<_metric> EQ 0]
+o220 if [#<_metric> EQ 0]
   #<_tc_return_units> = 20
-o210 else
+o220 else
   #<_tc_return_units> = 21
-o210 endif
+o220 endif
 (debug, Units recorded)
 
 ; Force metric
@@ -147,7 +164,6 @@ G21 G90
 #<tc_start_z> = #5422
 (debug, Position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
 
-(debug, Moved to safe position)
 ; *************** END SETUP ****************
 
 ; *************** CONTINUE VALIDATION ****************
@@ -159,12 +175,25 @@ G65P501
 G65P502
 ; *************** END VALIDATION ****************
 
+; *************** STAGING ****************
+
+o230 if [#<probing> EQ 0]
+  ;Move to safe position
+  (debug, Moving to safe position)
+  G0 G53 Z[#<_tc_safe_z>]
+  G0 G53 Y[#<_tc_safe_y>]
+  G0 G53 X[#<_tc_safe_x>]
+o230 endif
+
+
+; *************** END STAGING ****************
 
 ; ************ BEGIN UNLOAD ************
 
 o500 if [#<unload_mode> EQ 0]
   (debug, Unloading in rack tool)
   ; ************ MOTION BLOCK - UNLOAD IN RACK TOOL ************
+    ; TODO Disable Keepout
     G53 G0 Z[#<_tc_safe_z>]
     G53 G0 X[#<_tc_measure_x>]
     G53 G0 Y[#<_tc_y_pulloff>]
@@ -196,6 +225,7 @@ o500 if [#<unload_mode> EQ 0]
       o512 else
         G53 G0 Z[#<_tc_safe_z>]
         G53 G0 Y[#<_tc_y_pulloff>]
+        ; TODO Add keepout handling or a retry loop
        (abort, ATCI:1|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again)
       o512 endif
       #<current_probe_offset> = 0;
@@ -221,6 +251,7 @@ o500 if [#<unload_mode> EQ 0]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
       G53 G0 Z[#<_tc_safe_z>]
       G4P0
+      ; TODO Handle keepout exception
       (abort, ATCI:1|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
     o520 endif
 
@@ -235,6 +266,7 @@ o500 if [#<unload_mode> EQ 0]
     ; Check if tool is unloaded
     M66 P[#<_tc_input_tis>] L3 Q0.5
     o530 if [[#5399] EQ -1]
+      ; TODO Handle keepout exception 
       (abort, ATCI:1|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage. - May chain on safe position unload recovery procedure in the future.)
     o530 endif
 
@@ -248,6 +280,7 @@ o500 elseif [#<unload_mode> EQ 1]
 
     ; Move to off rack tool load / unload position
     G53 G0 Z[#<_tc_safe_z>]
+    ;TODO Split up XY movement so as not to intrude into safe ae
     G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
 
     ; Pause as long as the tool is not removed
@@ -295,6 +328,7 @@ o700 if [#<load_mode> EQ 0]
   #<tc_x_load> = [[[#<selected_tool_cache> - 1] * #<_tc_slot_offset>] + #<_tc_slot_one_x>]
   #<tc_y_load> = #<_tc_slot_one_y>
 
+  ; TODO Disable Keepout
   ; Go to load coordinates
   G53 G0 Z[#<_tc_safe_z>]
   G53 G0 X[#<tc_x_load>] Y[#<tc_y_load>]
@@ -344,8 +378,10 @@ o700 elseif [#<load_mode> EQ 1]
   (debug, Loading off rack tool)
   ; ************ MOTION BLOCK - LOAD OFF RACK TOOL ************
   ; Move to off rack tool load / unload position
+
   G53 G0 Z[#<_tc_safe_z>]
   G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+  ; TODO Enable Keepout
 
   ; Pause as long as the tool is not removed
   o730 do
@@ -399,9 +435,9 @@ o800 endif
 o900 if [#<probing> EQ 0]
   ; Move to safe Z
   G0 G53 Z[#<_tc_safe_z>]
-  ; Go to safe position (assume TLS - 150)
-  G0 G53 X[#<_tc_measure_x>]
-  G0 G53 Y[#<_tc_measure_y> - 150]
+  ; Go to safe position
+  G0 G53 X[#<_tc_safe_x>]
+  G0 G53 Y[#<_tc_safe_y>]
 
   ; Restore original position
   G0 X[#<tc_start_x>]
