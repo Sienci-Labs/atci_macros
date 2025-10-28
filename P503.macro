@@ -1,1 +1,24 @@
 ;reserve for rack probing helper
+
+
+;Check homed state
+o100 if [#<_homed_state> NE 1]
+  (abort, ATCI:1|Machine not homed|Home your machine to continue.)
+o100 endif
+
+(print, ATCI:0|Proceed to rough pull-stud position?)
+M0
+G4 P0
+G0 G53 Z0
+G4 P0
+;1113.759,-8.947,-113.425,0.000
+G1 G53 X[1113] Y[-8.5] F3000
+G4 P0
+(print, ATCI:0|Caution: Moving in z towards pull-stud.|Estop if necessary.)
+M0
+G4 P0
+G1 G53 Z[-75] F800
+G4 P0
+(print, ATCI:0|Rough Position Set|Please fine-tune the position of the sensor 1mm above the pull-stud and verify sensor light illuminates)
+M0
+M99
