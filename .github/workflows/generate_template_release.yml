@@ -1,0 +1,48 @@
+name: Generate Template and Upload to Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run Python script
+        run: python generate_template_import_file.py
+
+      - name: Get current date and filename
+        id: vars
+        run: |
+          DATE=$(date +'%Y%m%d')
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "filename=atci_templates_v${DATE}.json" >> $GITHUB_OUTPUT
+
+      - name: Check for existing release
+        id: check_release
+        run: |
+          RELEASE_ID=$(gh release view "daily-${{ steps.vars.outputs.date }}" --json id -q .id || echo "")
+          echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create or update release
+        run: |
+          DATE=${{ steps.vars.outputs.date }}
+          FILE=${{ steps.vars.outputs.filename }}
+          if [ -z "${{ steps.check_release.outputs.release_id }}" ]; then
+            gh release create "daily-${DATE}" "${FILE}" --title "Daily Release ${DATE}" --notes "Auto-generated template file for ${DATE}"
+          else
+            gh release upload "daily-${DATE}" "${FILE}" --clobber
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
