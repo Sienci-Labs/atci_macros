@@ -33,7 +33,7 @@ jobs:
           RELEASE_ID=$(gh release view "daily-${{ steps.vars.outputs.date }}" --json id -q .id || echo "")
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
 
       - name: Create or update release
         run: |
@@ -45,4 +45,4 @@ jobs:
             gh release upload "daily-${DATE}" "${FILE}" --clobber
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
