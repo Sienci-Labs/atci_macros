@@ -40,7 +40,7 @@ jobs:
           DATE=${{ steps.vars.outputs.date }}
           FILE=${{ steps.vars.outputs.filename }}
           if [ -z "${{ steps.check_release.outputs.release_id }}" ]; then
-            gh release create "daily-${DATE}" "${FILE}" --title "ATCI Macro Release V${DATE}" --notes "Auto-generated template file for ${DATE}"
+            gh release create "daily-${DATE}" "${FILE}" --title "ATCI Macro Release V${DATE}" --notes "Auto-generated template file for ${DATE} - available for installation into gSender"
           else
             gh release upload "daily-${DATE}" "${FILE}" --clobber
           fi
