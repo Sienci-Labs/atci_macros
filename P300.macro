@@ -62,9 +62,7 @@ G65P502
 
 ;Move to safe position
 (debug, Moving to safe position)
-G0 G53 Z[#<_tc_safe_z>]
-G0 G53 Y[#<_tc_safe_y>]
-G0 G53 X[#<_tc_safe_x>]
+G65 P504
 
 ; *************** END STAGING ****************
 
