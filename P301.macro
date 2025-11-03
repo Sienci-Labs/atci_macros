@@ -93,8 +93,8 @@ G0 G53 X[#<_tc_safe_x>]
 G0 G53 Y[#<_tc_safe_y>]
 
 (debug, Reapplying start coordinates #<_tc_start_x_301>, #<_tc_start_y_301>)
-G0 Y[#<_tc_start_y_301>]
 G0 X[#<_tc_start_x_301>]
+G0 Y[#<_tc_start_y_301>]
 
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 (debug, Reapplying units #<_tc_return_units_301>)
