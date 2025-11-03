@@ -73,6 +73,8 @@ G0 G53 X[#<_tc_safe_x>]
 ; ************ BEGIN TOOL CHANGE ************
 #1002 = 1
 M6T[#<_tool_cache_301>]
+#1002 = 0 ;Reset if tool change was not required
+
 (debug, Tool Change Complete)
 o200 if [#<_current_tool> EQ #<_tool_cache_301>]
     (debug, tool change successful, probing current tool)
