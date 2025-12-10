@@ -12,7 +12,7 @@ $340 = 5;       Spindle at speed tolerance (percentage)*
 $394 = 11;      Spindle on delay (seconds)*
 $539 = 15;      Spindle off delay (seconds)
 
-$476 = 2;       Spindle modbus address*
+;$476 = 2;       Spindle modbus address*
 $374 = 3;       MODBUS baud rate*
 $375 = 50;      MODBUS RX timeout*
 $681 = 0;       MODBUS serial format*
