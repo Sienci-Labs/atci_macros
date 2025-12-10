@@ -13,9 +13,11 @@ $394 = 11;      Spindle on delay (seconds)*
 $539 = 15;      Spindle off delay (seconds)
 
 ;$476 = 2;       Spindle modbus address*
+; Cannot be applied straight out
 $374 = 3;       MODBUS baud rate*
 $375 = 50;      MODBUS RX timeout*
-$681 = 0;       MODBUS serial format*
+; Cannot be applied straight out
+;$681 = 0;       MODBUS serial format*
 
 ; ******** TOOL PROBE SETTINGS ********
 
