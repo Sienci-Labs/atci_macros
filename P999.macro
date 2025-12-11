@@ -1,27 +1,6 @@
 ; This is the firmware configuration file that governs the application of firmware values required to operate the Sienci ATCi system.
 ; Asterisks (*) indicate non ATC specific firmware settings
 
-
-; ******** SPINDLE SETTINGS ********
-(print, Applying spindle settings)
-$395 = 2;       Default spindle is H100*
-$30 = 24000;    Max RPM*
-$31 = 7500;     Min RPM*
-
-$340 = 5;       Spindle at speed tolerance (percentage)*
-$394 = 11;      Spindle on delay (seconds)*
-$539 = 15;      Spindle off delay (seconds)
-
-;$476 = 2;       Spindle modbus address*
-; Cannot be applied straight out
-$374 = 3;       MODBUS baud rate*
-$375 = 50;      MODBUS RX timeout*
-; Cannot be applied straight out
-;$681 = 0;       MODBUS serial format*
-
-; ******** TOOL PROBE SETTINGS ********
-
-
 ; ******** TOOL CHANGER SETTINGS ********
 ; xxxxxxxx GENERAL CONFIG xxxxxxxx
 (print, Applying tool changer settings)
@@ -45,6 +24,8 @@ $762 = 2;       Event 3 port
 
 ; ******** KEEPOUT AREA SETTINGS ********
 
+; ******** TOOL PROBE SETTINGS ********
+
 ; ******** SD CARD SETTINGS ********
 (print, Applying SD settings)
 $650 = 1;       Auto mount SD Card
@@ -64,7 +45,33 @@ $$
 G4P0;
 
 ; ******** STARTUP RELATED SETTINGS ********
-; TODO Add flag to supress error checking in P200.macro
+; Flag to indicate initialization, will skip all error checking and prevent unintentional code execution
+#<_initializing> = 1;
 (print, Applying startup related settings)
-;$N1=G65P100
-;$N0=G65P200
+$N1=G65P100
+G4P0.5
+$N0=G65P200
+G4P0.5
+
+; ******** CLEAR SPINDLE NOSE ********
+
+; Check tool changer setup
+G65P509;
+
+;TODO Clear spindle nose
+M66 P[#<_tc_input_tis>] L4 Q0.5
+o200 if [[#5399] EQ -1]
+o200 else
+    o201 do
+        (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+        G4P0
+        M64 P[#<_tc_output_bt>]
+        M0
+        M66 P[#<_tc_input_tis>] L3 Q0.05
+        G4P0.1
+    o201 while [[#5399] EQ -1]
+    M65 P[#<_tc_output_bt>]
+o200 endif
+
+M61 Q[#<_empty_tool>]
+G49

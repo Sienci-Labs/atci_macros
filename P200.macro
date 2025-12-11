@@ -3,7 +3,6 @@
 ; ******** BASIC SETUP ********
 
 ; The number of slots in your magazine. Defined in P100.macro, will abort if not defined.
-
 ;#<_tc_slots> = 6; Enable for Ad-hoc definition.
 
 o100 if [[EXISTS[#<_tc_slots>]] EQ 0]
@@ -32,16 +31,17 @@ o101 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
 o101 endif
 
-; ******** COORDINATE SETUP ********
+; ******** COORDINATES SETUP ********
+
 ; ******** XY Axis ********
 ; The X and Y machine coordinate positions of slot 1.
+
 #<_tc_slot_one_x> = #5341
 (debug, Slot 1 X: #<_tc_slot_one_x> from G59.1)
 #<_tc_slot_one_y> = #5342
 (debug, Slot 1 Y: #<_tc_slot_one_y> from G59.1)
 
-; The slot offset for your rack. Defined by variables #<_tc_slot_offset>
-; Defined in P100.macro, will abort if not defined.
+; The slot offset for your rack. Defined by variables #<_tc_slot_offset>. Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
 o102 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
@@ -187,56 +187,61 @@ o104 endif
 (debug, Compatible version: #<_comp_ver>)
 
 ; ******** STARTUP ********
+
 ; ******** STARTUP ACTIONS ********
 ; Turn off spindle, highly unlikely scenario
 M5
 
 ; ******** STARTUP CHECK ********
+; Disable during initialization
+o200 if [EXISTS[#<_initializing>] EQ 1]
+  (print, Initializing, all checks skipped)
+o200 else
+  ;Check homed state
+  o300 if [#<_homed_state> NE 1]
+    (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
+  o300 endif
 
-;Check homed state
-o200 if [#<_homed_state> NE 1]
-  (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
+  ; Check if state of the spindle is in sync with firmware
+  M66 P[#<_tc_input_tis>] L4 Q0.5
+
+  o310 if [[#5399] EQ -1]
+    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+      (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
+      M61 Q[#<_empty_tool>]
+      M0
+    o311 endif
+  o310 else
+    o312 if [#<_current_tool> EQ 0]
+        (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
+        M0
+        G53 G0 Z[#<_tc_safe_z>]
+        G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
+      ; Move to off rack tool load / unload position
+      o313 do
+        (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+        G4P0
+        M64 P[#<_tc_output_bt>]
+        M0
+        M66 P[#<_tc_input_tis>] L3 Q0.05
+        G4P0.1
+      o313 while [[#5399] EQ -1]
+      M65 P[#<_tc_output_bt>]
+    o312 endif
+  o310 endif
+
+  ; ******** APPLY TOOL OFFSET ********
+
+  ; Reapply tool offset at startup
+  o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    G43 H[#<_current_tool>]
+    (debug, Tool offset for #<_current_tool> applied)
+  o400 else
+    G49
+    (debug, Tool not in holder, offsets cleared)
+  o400 endif
+
 o200 endif
-
-; Check if state of the spindle is in sync with firmware
-M66 P[#<_tc_input_tis>] L4 Q0.5
-
-o210 if [[#5399] EQ -1]
-  o211 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
-    (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
-    M61 Q[#<_empty_tool>]
-    M0
-  o211 endif
-o210 else
-  o212 if [#<_current_tool> EQ 0]
-      (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
-      M0
-      G53 G0 Z[#<_tc_safe_z>]
-      G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
-    ; Move to off rack tool load / unload position
-    o213 do
-      (print, ATCI:0|Action Required|Remove tool using the drawbar button)
-      G4P0
-      M64 P[#<_tc_output_bt>]
-      M0
-      M66 P[#<_tc_input_tis>] L3 Q0.05
-      G4P0.1
-    o213 while [[#5399] EQ -1]
-    M65 P[#<_tc_output_bt>]
-  o212 endif
-o210 endif
-
-
-; ******** APPLY TOOL OFFSET ********
-
-; Reapply tool offset at startup
-o300 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
-  G43 H[#<_current_tool>]
-  (debug, Tool offset for #<_current_tool> applied)
-o300 else
-  G49
-  (debug, Tool not in holder, offsets cleared)
-o300 endif
 
 ; The flag indicating that the settings have been loaded into memory.
 #1001 = 1

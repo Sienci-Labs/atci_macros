@@ -1,0 +1,6 @@
+; This is a helper function to check if P200.macro is loaded successfully.
+; #1001 is set to 1 when the parameters in P200 is set.
+
+o100 if [#1001 NE 1]
+  (abort, ATCI:1|Tool changer not initialized|Initialize the tool changer to continue)
+o100 endif

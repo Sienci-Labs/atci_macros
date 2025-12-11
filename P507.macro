@@ -1,0 +1,6 @@
+; This is a helper function to check if the controller is initialized without a controller restart.
+; The _initializing variable is set by P999.macro.
+
+o100 if [EXISTS[#<_initializing>] EQ 1]
+  (abort, ATCI:1|Setup incomplete|Tool changer disabled, restart your controller to continue.)
+o100 endif

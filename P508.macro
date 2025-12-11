@@ -1,0 +1,5 @@
+; This is a helper function to check if the machine has been homed.
+
+o100 if [#<_homed_state> NE 1]
+  (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
+o100 endif

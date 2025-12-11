@@ -1,24 +1,19 @@
 ; ************ DESCRIPTION ************
-; Picks up tool QX and probes it
-; If it is an in rack tool, allow the rack to be empty
-; If it is an off rack tool, user must insert a tool
-
+; Probe all tools in the rack
 
 ; Local variables
 #<_current_slot> = 1;
 
 ; ************ BEGIN VALIDATION ************
-;Check homed state
-o100 if [#<_homed_state> NE 1]
-    (abort, Tool changer offline as machine is not homed. Home your machine to continue.)
-o100 endif
+;Check initializing
+G65P507;
 
-; Check tool changer setup
-o110 if [#1001 NE 1]
-  (abort, Tool changer not initialized. Initialize the tool changer to continue.)
-  M0
-  M99
-o110 endif
+;Check homed state
+G65P508;
+
+; Check tool changer parameters
+G65P509;
+
 ; ************ PAUSE VALIDATION ************
 
 ; ************ BEGIN SETUP ************

@@ -22,15 +22,6 @@
 #<selected_tool_cache> = #<_selected_tool>; Caching selected tool variable as M61 will clear this variable when changing current tool to 0 between tool unload and tool load.
 
 ; ************ BEGIN VALIDATION ************
-;Check homed state
-o100 if [#<_homed_state> NE 1]
-  (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
-o100 endif
-
-; Check tool changer setup
-o110 if [#1001 NE 1]
-  (abort, ATCI:1|Tool changer not initialized|Initialize the tool changer to continue)
-o110 endif
 
 ; Check if tool changing as part of a probe cycle
 o130 if [#1002 EQ 1]
@@ -54,6 +45,15 @@ o132 if [#1004 EQ 1]
   #1004 = 0
   #<force_manual_load> = 1
 o132 endif
+
+;Check initializing
+G65P507;
+
+;Check homed state
+G65P508;
+
+; Check tool changer parameters
+G65P509;
 
 ; Check rack presence
 M66 P[#<_tc_input_rack>] L3 Q0.01
@@ -510,7 +510,6 @@ G[#<_tc_return_units>]
 (debug, Reapplying units #<_tc_return_units>)
 
 ; ************ END RESTORE MODAL ************
-
 
 (debug, End tool change macro)
 M99;

@@ -6,8 +6,9 @@ M66 P[#<_tc_input_tis>] L4 Q0.5
 o100 if [[#5399] EQ -1]
   o101 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
     (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
-    M61 Q[#<_empty_tool>]
     M0
+    M61 Q[#<_empty_tool>]
+    G49
   o101 endif
 o100 else
   o102 if [#<_current_tool> EQ 0]
@@ -25,7 +26,8 @@ o100 else
       G4P0.1
     o103 while [[#5399] EQ -1]
     M65 P[#<_tc_output_bt>]
+    M61 Q[#<_empty_tool>]
+    G49
   o102 endif
 o100 endif
-
 M99;

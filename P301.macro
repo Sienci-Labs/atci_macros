@@ -3,22 +3,18 @@
 ; If it is an in rack tool, allow the rack to be empty
 ; If it is an off rack tool, user must insert a tool
 
-
 ; Local variables
 #<selected_tool_cache> = #17;
 
 ; ************ BEGIN VALIDATION ************
-;Check homed state
-o100 if [#<_homed_state> NE 1]
-    (abort, Tool changer offline as machine is not homed. Home your machine to continue.)
-o100 endif
+;Check initializing
+G65P507;
 
-; Check tool changer setup
-o110 if [#1001 NE 1]
-  (abort, Tool changer not initialized. Initialize the tool changer to continue.)
-  M0
-  M99
-o110 endif
+;Check homed state
+G65P508;
+
+; Check tool changer parameters
+G65P509;
 
 o130 if [#<selected_tool_cache> LE 0 OR #<selected_tool_cache> GT #<_tc_table_size>] 
     (abort, Invalid tool number)
