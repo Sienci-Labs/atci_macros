@@ -19,6 +19,12 @@
 #<xMaxY> = #<_NAN>
 #<xLast> = #<_NAN>
 #<foundXMax> = #<_NAN>
+G4 P0.2
+
+;Free pinstate before probing
+G4 P0
+M66 P[#<_tc_input_th>] L4 Q0.01
+G4 P0
 
 ;move out of pullstud boundary in pos y dir until sensor reads low
 o201 do
@@ -116,7 +122,7 @@ o206 do
         M66 P[#<_tc_input_th>] L4 Q0.01
         #<currI> = [#<currI> + 1]
         G4 P0
-    o301 while [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 30]]]
+    o301 while [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 40]]]
 
     o302 if [#5399 NE 0]
         (abort, ATCI:1|timeout finding y centerline)
@@ -161,7 +167,7 @@ o207 do
     M66 P[#<_tc_input_th>] L4 Q0.01
     #<currI> = [#<currI> + 1]
     G4 P0
-o207 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 30]]]
+o207 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 40]]]
 
 o208 if [#5399 NE 0]
     (abort, ATCI:1|Probe failed to find pull-stud within the search area.)

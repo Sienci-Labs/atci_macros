@@ -31,7 +31,7 @@
 #<rack2expX> = #<_NAN>
 #<rack2expY> = #<_NAN>
 #<rack2expZ> = #<_NAN>
-
+G4 P0.2
 
 ;=================MACRO START=====================
 ;Pre-flight checks
@@ -60,6 +60,8 @@ o101 endif
 G4 P0
 M66 P[#<_tc_input_rack>] L4 Q0.01
 G4 P0
+(print, 3)
+
 o102 if [#5399 NE -1]
     (abort, ATCI:0|Rack Presence Sensor Error|Rack not Present or Rack Sensor is not detected. Please refer to trouble-shooting guide and retry)
     M99
