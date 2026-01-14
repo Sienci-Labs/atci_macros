@@ -241,12 +241,18 @@ o214 if [#5399 NE 0]
     M99
 o214 endif
 
+(print, Zprobe #<_ZPrb>)
+(print, Z #<_z>)
+
 ;Calculate EMA between old Z and latest Z (e = 0.4 from literature)
 o215 if [#<_ZPrb> EQ #<_NAN>]
     ;initialize first Z probe value
+    (print, First Z init)
     #<_ZPrb> = #<_z>
 o215 else
+    (print, Averaging Z)
     #<_ZPrb> = [#<_ZPrb> + [0.4 * [#<_z> - #<_ZPrb>]]]
+    (print, new z #<_ZPrb>)
 o215 endif
 G4 P0
 
@@ -254,6 +260,6 @@ G4 P0
 
 ;Free Pinstate after subroutine completion to prevent probing error or controller hang on next probe.
 M66 P[#<_tc_input_th>] L4 Q0.01
-G4 P0
+G4 P2
 
 (print, End of Subroutine)

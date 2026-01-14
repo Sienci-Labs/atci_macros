@@ -51,6 +51,8 @@ G21 G90
 
 ; *************** CONTINUE VALIDATION ****************
 ; Movements based validation
+;Check pressure with helper function
+G65P501
 
 ; Check rack sync with helper function
 G65P502
