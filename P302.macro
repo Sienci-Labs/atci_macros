@@ -12,7 +12,7 @@
 
 ;================setup================
 ;#<_tc_input_th> -> TH sensor pin
-#<_NAN> = -999999999
+#<_NAN> = -9999999
 #<_XPrb> = #<_NAN>
 #<_YPrb> = #<_NAN>
 #<_ZPrb> = #<_NAN>
@@ -60,7 +60,6 @@ o101 endif
 G4 P0
 M66 P[#<_tc_input_rack>] L4 Q0.01
 G4 P0
-(print, 3)
 
 o102 if [#5399 NE -1]
     (abort, ATCI:0|Rack Presence Sensor Error|Rack not Present or Rack Sensor is not detected. Please refer to trouble-shooting guide and retry)
@@ -97,7 +96,7 @@ M810 P0
 G4 P0.1
 
 ;Begin Probing Sequence
-(print, ATCI:1|Begin Rack Probing?|Will Probe Position of Tool Holders. Caution: safe keepouts will be disabled during probing, be prepared to e-stop if necessary.)
+(print, ATCI:1|Begin Rack Probing Sequence?|Will Probe Position of Tool Holders. Caution: safe keepouts will be disabled during probing, be prepared to e-stop if necessary.)
 M0
 
 ;Initialize staring position for determining Z height offset when probing x and y
@@ -257,7 +256,8 @@ o201 endif
 
 (print, PROBE MACRO COMPLETE)
 
-;Move to safe position
+;Move to safe home position
+(print, Moving to safe home position...)
 $H
 
 ;End of Macro

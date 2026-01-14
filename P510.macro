@@ -26,7 +26,7 @@ G4 P0
 M66 P[#<_tc_input_th>] L4 Q0.01
 G4 P0
 
-;move out of pullstud boundary in pos y dir until sensor reads low
+;Move out of pullstud boundary in pos y dir until sensor reads low
 o201 do
     G4 P0
     G1 G91 Y[#<_roughStep>] F6000
@@ -34,8 +34,8 @@ o201 do
     G4 P0
 o201 while[#5399 EQ 0]
 
-;=================Probe first Pullstud=====================
-;backoff from pullstud
+;=================Probe first Pull-stud=====================
+;Back-off from pull-stud
 G4 P0
 G1 G91 X[#<_xBKOff> + [#<_studDiam> / 2]] Y[#<_yBKOff>] F2000
 
@@ -96,7 +96,7 @@ o204 endwhile
 
 o205 if [#5399 NE 0]
     (print, #<currI> #<currJ>)
-    ;return y_prb to null state to prevent garbage value being set
+    ;return y_prb to null state to prevent garbage value being set (Unused but may want to check later)
     #<y_prb> = #<_NAN>
     (abort, ATCI:1|Probe failed to find pull-stud within the search area)
     M99
@@ -125,7 +125,7 @@ o206 do
     o301 while [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 40]]]
 
     o302 if [#5399 NE 0]
-        (abort, ATCI:1|timeout finding y centerline)
+        (abort, ATCI:1|Timeout finding y centerline)
         M99
     o302 elseif [#5399 EQ 0]
         o401 if [[[#<xLast> - #<_x>] GT 0.05] AND [[#<xLast> - #<_x>] LE 0.5]]
@@ -185,7 +185,7 @@ G4 P0
 (print, X1 diam: #<xDiam>)
 (print, X1 CL: #<xCent>)
 
-;Recalculate Front Y position
+;Reprobe Front Y position
 G4 P0
 G1 G53 Y[#<y_prb> + #<_yBKOff>] F6000
 G1 G53 X[#<xCent>] F6000
@@ -210,7 +210,7 @@ o210 endif
 
 #<_XPrb> = #<xCent>
 
-;Calculate Exponential Moving Average between old Y and latest Y CP
+;Calculate Exponential Moving Average between old Y and latest Y CP (e = 0.4 from literature for best appx weighting)
 o212 if [#<_YPrb> EQ #<_NAN>]
     ;initialize first Y probe value
     #<_YPrb> = [#<_y> - [#<xDiam> / 2]]
@@ -241,10 +241,8 @@ o214 if [#5399 NE 0]
     M99
 o214 endif
 
-(print, Zprobe #<_ZPrb>)
-(print, Z #<_z>)
+;Calculate EMA between old Z and latest Z (e = 0.4 from literature for best appx weighting)
 
-;Calculate EMA between old Z and latest Z (e = 0.4 from literature)
 o215 if [#<_ZPrb> EQ #<_NAN>]
     ;initialize first Z probe value
     (print, First Z init)
