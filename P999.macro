@@ -22,7 +22,10 @@ $760 = 0;       Event 1 port
 $761 = 1;       Event 2 port
 $762 = 2;       Event 3 port
 
-; ******** KEEPOUT AREA SETTINGS ********
+; ******** HOMING SETTINGS ********
+$44 = 4;        Primary Homing Move
+$45 = 1;        Secondary Homing Move
+$46 = 2;        Tertiary Homing Move
 
 ; ******** TOOL PROBE SETTINGS ********
 
@@ -67,7 +70,7 @@ o200 else
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
-        M66 P[#<_tc_input_tis>] L3 Q0.05
+        M66 P[#<_tc_input_tis>] L4 Q0.05
         G4P0.1
     o201 while [[#5399] EQ -1]
     M65 P[#<_tc_output_bt>]
@@ -75,3 +78,5 @@ o200 endif
 
 M61 Q[#<_empty_tool>]
 G49
+
+M99

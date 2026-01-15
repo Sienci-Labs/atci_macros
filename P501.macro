@@ -3,14 +3,14 @@
 (debug, Running helper function P501 for pressure checking)
 
 o100 if [#<_pres_sense> EQ 1]
-  M66 P2 L3 Q0.01
+  M66 P[#<_tc_input_pres>] L4 Q0.01
   G4P0.1
   o101 while [#5399 EQ -1]
     G4P0
     (print, ATCI:0|Action Required|Insufficient air pressure, increase or supply compressed air to the spindle to continue.)
     G4P0
     M0
-    M66 P2 L3 Q0.01
+    M66 P[#<_tc_input_pres>] L4 Q0.01
     G4P0.1
   o101 endwhile
 o100 endif
