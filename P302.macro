@@ -26,7 +26,7 @@
 #<rackMode> = -1
 #<setUnits> = #<_NAN>
 ;Z offset includes probe sensing distance of ~3mm
-#<probeZOffset> = -13
+#<probeZOffset> = -12
 #<probeYOffset> = -46
 #<rack2expX> = #<_NAN>
 #<rack2expY> = #<_NAN>
@@ -101,15 +101,15 @@ M0
 
 ;Initialize staring position for determining Z height offset when probing x and y
 G4 P0
-#<startX> = #<_x>
-#<startY> = #<_y>
-#<startZ> = #<_z>
+#<startX> = #<_abs_x>
+#<startY> = #<_abs_y>
+#<startZ> = #<_abs_z>
 G4 P0
 
 ;Probe First Pull-stud
 G65 P510
 
-;Retain user positioned sensor z offset to maintain consistency of probing
+;Retain user positioned sensor z offset to maintain consistency of probing (0.8X original touchoff travel distance to avoid crashing probe into pull-stud)
 #<_ZPrbSensitivity> = [0.8 * ABS[#<_ZPrb> - #<startZ>]]
 
 ;rough position over second pullstud based on tool offset spacing

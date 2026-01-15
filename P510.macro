@@ -53,7 +53,7 @@ o202 while [[#5399 NE 0] AND [#<currJ> LT [[#<_yBKOff> / #<_roughStep>] + 5]]]
         G4 P0
     o301 while  [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_roughStep>] + 10]]]
     o302 if [#5399 EQ 0]
-        #<y_prb> = #<_y>
+        #<y_prb> = #<_abs_y>
         o202 break
     o302 endif
     G1 G91 X[#<_roughStep> * #<currI>] F6000
@@ -85,7 +85,7 @@ o204 while [[#5399 NE 0] AND [#<currJ> LT [[#<_yBKOff> / #<_fineStep>] + 5]]]
         G4 P0
     o301 while  [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 5]]]
     o302 if [#5399 EQ 0]
-        #<y_prb> = #<_y>
+        #<y_prb> = #<_abs_y>
         o204 break
     o302 endif
     G1 G91 X[#<_fineStep> * #<currI>] F3000
@@ -128,16 +128,16 @@ o206 do
         (abort, ATCI:1|Timeout finding y centerline)
         M99
     o302 elseif [#5399 EQ 0]
-        o401 if [[[#<xLast> - #<_x>] GT 0.05] AND [[#<xLast> - #<_x>] LE 0.5]]
+        o401 if [[[#<xLast> - #<_abs_x>] GT 0.05] AND [[#<xLast> - #<_abs_x>] LE 0.5]]
             #<foundXMax> = 1
             o206 break
-        o401 elseif [[#<xLast> - #<_x>] LE 0.05]
-            #<xLast> = #<_x>
+        o401 elseif [[#<xLast> - #<_abs_x>] LE 0.05]
+            #<xLast> = #<_abs_x>
             #<foundXMax> = 0
         o401 endif
-        o402 if [#<_x> GT #<xMax>]
-            #<xMax> = #<_x>
-            #<xMaxY> = #<_y>
+        o402 if [#<_abs_x> GT #<xMax>]
+            #<xMax> = #<_abs_x>
+            #<xMaxY> = #<_abs_y>
         o402 endif
     o302 endif
     G4 P0
@@ -175,7 +175,7 @@ o208 if [#5399 NE 0]
 o208 endif
 
 G4 P0
-#<x_prb_L> = #<_x>
+#<x_prb_L> = #<_abs_x>
 G4 P0
 
 ;Find stud diameter
@@ -213,15 +213,15 @@ o210 endif
 ;Calculate Exponential Moving Average between old Y and latest Y CP (e = 0.4 from literature for best appx weighting)
 o212 if [#<_YPrb> EQ #<_NAN>]
     ;initialize first Y probe value
-    #<_YPrb> = [#<_y> - [#<xDiam> / 2]]
+    #<_YPrb> = [#<_abs_y> - [#<xDiam> / 2]]
 o212 else
-    #<_YPrb> = [#<_YPrb> + [0.4 * [[#<_y> - [#<xDiam> / 2]] - #<_YPrb>]]]
+    #<_YPrb> = [#<_YPrb> + [0.4 * [[#<_abs_y> - [#<xDiam> / 2]] - #<_YPrb>]]]
 o212 endif
 
 ;Z probe
 G4 P0
 G1 G91 Z[#<_xBKOff>] F3000
-G1 G53 X[#<xCent>] Y[#<_y> - [#<xDiam> / 2]] F3000
+G1 G53 X[#<xCent>] Y[#<_abs_y> - [#<xDiam> / 2]] F3000
 
 ;Free pinstate before probing
 G4 P0
@@ -244,9 +244,9 @@ o214 endif
 ;Calculate EMA between old Z and latest Z (e = 0.4 from literature for best appx weighting)
 o215 if [#<_ZPrb> EQ #<_NAN>]
     ;initialize first Z probe value
-    #<_ZPrb> = #<_z>
+    #<_ZPrb> = #<_abs_z>
 o215 else
-    #<_ZPrb> = [#<_ZPrb> + [0.4 * [#<_z> - #<_ZPrb>]]]
+    #<_ZPrb> = [#<_ZPrb> + [0.4 * [#<_abs_z> - #<_ZPrb>]]]
 o215 endif
 G4 P0
 
