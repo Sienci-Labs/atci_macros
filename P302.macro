@@ -250,7 +250,7 @@ G4 P0
 M0
 
 ;Return units to inch if previously set
-o201 if [#<setUnits>]
+o201 if [#<setUnits> EQ 1]
     G20
 o201 endif
 
