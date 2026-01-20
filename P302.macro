@@ -92,7 +92,7 @@ o104 if [#5399 EQ -1]
 o104 endif
 
 (print, Disabling safe keepouts...)
-M810 P0
+M960 P0
 G4 P0.1
 
 ;Begin Probing Sequence
