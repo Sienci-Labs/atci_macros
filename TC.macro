@@ -71,10 +71,10 @@ o133 endif
 ; For example, keepout should typically be enabled when entering the rack area, but this should be overridden if the global flag is false
 ; Alternatively, keepout should be re-enabled when exiting the rack area, but again this should be overridden if the global flag
 o134 if [#<probing> EQ 0 AND #<passthrough> EQ 0]
-  ;M810 P1;
+  ;M960 P1;
   (print, Keepout enabled)
 o134 else
-  ;M810 P0;
+  ;M960 P0;
   (print, Keepout disabled)
 o134 endif
 
@@ -181,7 +181,7 @@ o300 if [#<unload_mode> EQ 0]
   ; Move to safe position
   G65 P504
   ; Disable keepout
-  M810 P0;
+  M960 P0;
   G4 P0;
   (debug, Disable keepout)
 o300 elseif [#<unload_mode> EQ 1]
@@ -325,7 +325,7 @@ o600 if [#<unload_mode> EQ 0]
     ; Exit rack
     G65 P506
     ; Re-enable keepout
-    M810 P1;
+    M960 P1;
     G4 P0;
     (debug, Enable keepout)
     ; Move to off rack position
@@ -335,7 +335,7 @@ o600 if [#<unload_mode> EQ 0]
     ; Exit rack
     G65 P506
     ; Re-enable keepout
-    M810 P1;
+    M960 P1;
     G4 P0;
     (debug, Enable keepout)
     ; Hold position
@@ -347,7 +347,7 @@ o600 elseif [#<unload_mode> EQ 1]
     ; Move to safe position
     G65 P504
     ; Disable keepout
-    M810 P0;
+    M960 P0;
     G4 P0;
     (debug, Disable keepout)
   o620 elseif [#<load_mode> EQ 1]
@@ -364,7 +364,7 @@ o600 else
     ; Move to safe position
     G65 P504
     ; Disable keepout
-    M810 P0;
+    M960 P0;
     G4 P0;
     (debug, Disable keepout)
   o630 elseif [#<load_mode> EQ 1]
@@ -464,7 +464,7 @@ o800 if [#<load_mode> EQ 0]
     ; Exit rack
     G65 P506
     ; Re-enable keepout
-    M810 P1;
+    M960 P1;
     G4 P0;
     (debug, Enable keepout)
 o800 elseif [#<load_mode> EQ 1]
