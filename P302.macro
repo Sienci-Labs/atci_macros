@@ -259,6 +259,6 @@ o201 endif
 ;Move to safe home position
 (print, Moving to safe home position...)
 $H
-
+(print, ATCI|rack_set:1)
 ;End of Macro
 M99
