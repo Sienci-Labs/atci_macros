@@ -86,10 +86,10 @@ o102 endif
 #<keepout_y_max> = 0
 (print, #<keepout_y_max>)
 
-G65P1Q684S[#<keepout_x_min>]
-G65P1Q686S[#<keepout_x_max>]
+;G65P1Q684S[#<keepout_x_min>]
+;G65P1Q686S[#<keepout_x_max>]
 ;G65P1Q685S-10
-G65P1Q687S[#<keepout_y_max>]
+;G65P1Q687S[#<keepout_y_max>]
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
