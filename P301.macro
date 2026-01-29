@@ -16,7 +16,7 @@ G65P508;
 ; Check tool changer parameters
 G65P509;
 
-o130 if [#<selected_tool_cache> LE 0 OR #<selected_tool_cache> GT #<_tc_table_size>] 
+o130 if [#<selected_tool_cache> LE 0 OR #<selected_tool_cache> GT #<_tool_table_size>] 
     (abort, Invalid tool number)
 o130 endif
 ; ************ PAUSE VALIDATION ************
@@ -62,9 +62,7 @@ G65P502
 
 ;Move to safe position
 (debug, Moving to safe position)
-G0 G53 Z[#<_tc_safe_z>]
-G0 G53 Y[#<_tc_safe_y>]
-G0 G53 X[#<_tc_safe_x>]
+G65 P504
 
 ; *************** END STAGING ****************
 

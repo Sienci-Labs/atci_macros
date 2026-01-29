@@ -11,8 +11,11 @@ o100 endif
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
-#<_tc_table_size> = 32
-(debug, Table size: #<_tc_table_size>)
+o100 if [#<_tool_table_size> EQ 0]
+  (abort, ATCI:2|Missing tool table|Tool table not enabled in controller firmware.)
+o100 endif
+
+(debug, Table size: #<_tool_table_size>)
 
 ; ******** OFFSET BEHAVIOR SETUP ********
 ; On and Off Rack Offset Management Modes defined by variables #<_irt_offset_mode> and #<_ort_offset_mode>
@@ -228,7 +231,7 @@ o200 else
   M66 P[#<_tc_input_tis>] L4 Q0.5
 
   o310 if [[#5399] EQ -1]
-    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
       (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
       M61 Q[#<_empty_tool>]
       M0
@@ -255,7 +258,7 @@ o200 else
   ; ******** APPLY TOOL OFFSET ********
 
   ; Reapply tool offset at startup
-  o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+  o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
     G43 H[#<_current_tool>]
     (debug, Tool offset for #<_current_tool> applied)
   o400 else
@@ -280,6 +283,6 @@ o200 endif
 #1004 = 0
 
 ; ********SENDER COMMUNICATIONS ********
-(print,ATCI|table_size:#<_tc_table_size>|rack_size:#<_tc_slots>)
+(print,ATCI|table_size:#<_tool_table_size>|rack_size:#<_tc_slots>)
 
 M99
