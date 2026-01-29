@@ -78,18 +78,20 @@ o102 endif
 #<fork_front_depth> = 30.5
 
 #<keepout_x_min> = [#<_tc_slot_one_x> - #<shoe_width> / 2 - #<fork_width> / 2]
-(print, #<keepout_x_min>)
+(print, Keepout X min: #<keepout_x_min>)
 #<keepout_x_max> = [#<_tc_slot_one_x> + [#<_tc_slots> - 1] * #<_tc_slot_offset> + #<shoe_width> / 2 + #<fork_width> / 2]
-(print, #<keepout_x_max>)
+(print, Keepout X max: #<keepout_x_max>)
 #<keepout_y_min> = [#<_tc_slot_one_y> - #<fork_front_depth> - #<shoe_depth>]
-(print, #<keepout_y_min>)
+(print, Keepout Y min: #<keepout_y_min>)
 #<keepout_y_max> = 0
-(print, #<keepout_y_max>)
+(print, Keepout Y max #<keepout_y_max>)
 
-;G65P1Q684S[#<keepout_x_min>]
-;G65P1Q686S[#<keepout_x_max>]
-;G65P1Q685S-10
-;G65P1Q687S[#<keepout_y_max>]
+G65P1Q684S[#<keepout_x_min>]
+G65P1Q686S[#<keepout_x_max>]
+G65P1Q685S[#<keepout_y_min>]
+G65P1Q687S[#<keepout_y_max>]
+
+M960P1;
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
