@@ -62,17 +62,15 @@ G4P0.5
 G65P509;
 
 ;TODO Clear spindle nose
-M66 P[#<_tc_input_tis>] L4 Q0.5
-o200 if [[#5399] EQ -1]
-o200 else
+M66 P[#<_tc_input_tis>] L4 Q0.05
+o200 if [[#5399] NE -1]
     o201 do
         (print, ATCI:0|Action Required|Remove tool using the drawbar button)
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
         M66 P[#<_tc_input_tis>] L4 Q0.05
-        G4P0.1
-    o201 while [[#5399] EQ -1]
+    o201 while [[#5399] NE -1]
     M65 P[#<_tc_output_bt>]
 o200 endif
 
