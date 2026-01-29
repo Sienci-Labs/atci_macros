@@ -11,9 +11,9 @@ o100 endif
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
-o100 if [#<_tool_table_size> EQ 0]
+o101 if [#<_tool_table_size> EQ 0]
   (abort, ATCI:2|Missing tool table|Tool table not enabled in controller firmware.)
-o100 endif
+o101 endif
 
 (debug, Table size: #<_tool_table_size>)
 
@@ -28,11 +28,11 @@ o100 endif
 ;#<_irt_offset_mode> = 2; Enable for Ad-hoc definition.
 ;#<_ort_offset_mode> = 0; Enable for Ad-hoc definition.
 
-o101 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
+o102 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again)
-o101 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
+o102 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
-o101 endif
+o102 endif
 
 ; ******** COORDINATES SETUP ********
 
@@ -47,9 +47,9 @@ o101 endif
 ; The slot offset for your rack. Defined by variables #<_tc_slot_offset>. Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
-o102 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
+o103 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
-o102 endif
+o103 endif
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
@@ -180,9 +180,9 @@ M960P1;
 
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
-o103 if [[EXISTS[#<_holder_sense>]] EQ 0]
+o104 if [[EXISTS[#<_holder_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
-o103 endif
+o104 endif
 (debug, Tool Holder Sensor: #<_holder_sense>)
 
 ; Tool holder sensor Y offset relative to spindle center line
@@ -198,9 +198,9 @@ o103 endif
 
 ; ******** PRESSURE SENSOR CONTROL ********
 
-o104 if [[EXISTS[#<_pres_sense>]] EQ 0]
+o105 if [[EXISTS[#<_pres_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
-o104 endif
+o105 endif
 (debug, Pressure Sensor: #<_pres_sense>)
 
 ; ******** SYSTEM VARIABLES ********
