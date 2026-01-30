@@ -230,6 +230,8 @@ M5
 ; Disable during initialization
 o200 if [EXISTS[#<_initializing>] EQ 1]
   (print, Initializing, all checks skipped)
+  ; ******** DISABLE KEEPOUT ********
+  M960 P0
 o200 else
   ;Check homed state
   o300 if [#<_homed_state> NE 1]
