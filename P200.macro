@@ -34,6 +34,8 @@ o102 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
 o102 endif
 
+(debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode>)
+
 ; ******** COORDINATES SETUP ********
 
 ; ******** XY Axis ********
@@ -94,7 +96,14 @@ G65P1Q686S[#<keepout_x_max>]
 G65P1Q685S[#<keepout_y_min>]
 G65P1Q687S[#<keepout_y_max>]
 
-M960P1;
+; Keepout feature on/off
+o103 if [#<_tc_slots> EQ 0]
+  (print, Keepout Feature: 0)
+  G65P1Q683S0;
+o103 else
+  (print, Keepout Feature: 1)
+  G65P1Q683S3;
+o103 endif
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
@@ -180,9 +189,9 @@ M960P1;
 
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
-o104 if [[EXISTS[#<_holder_sense>]] EQ 0]
+o105 if [[EXISTS[#<_holder_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
-o104 endif
+o105 endif
 (debug, Tool Holder Sensor: #<_holder_sense>)
 
 ; Tool holder sensor Y offset relative to spindle center line
@@ -198,9 +207,9 @@ o104 endif
 
 ; ******** PRESSURE SENSOR CONTROL ********
 
-o105 if [[EXISTS[#<_pres_sense>]] EQ 0]
+o106 if [[EXISTS[#<_pres_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
-o105 endif
+o106 endif
 (debug, Pressure Sensor: #<_pres_sense>)
 
 ; ******** SYSTEM VARIABLES ********
@@ -265,6 +274,9 @@ o200 else
     G49
     (debug, Tool not in holder, offsets cleared)
   o400 endif
+
+  ; ******** ENABLE KEEPOUT ********
+  M960 P1
 
 o200 endif
 

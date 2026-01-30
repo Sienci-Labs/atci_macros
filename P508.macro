@@ -4,3 +4,4 @@ G4 P0;
 o100 if [#<_homed_state> NE 1]
   (abort, ATCI:2|Machine not homed|Tool changer disabled, home your machine to continue.)
 o100 endif
+G4 P0;

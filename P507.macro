@@ -5,3 +5,4 @@ G4 P0;
 o100 if [EXISTS[#<_initializing>] EQ 1]
   (abort, ATCI:2|Setup incomplete|Tool changer disabled, restart your controller to continue.)
 o100 endif
+G4 P0;
