@@ -12,7 +12,7 @@ o100 endif
 
 ; The number of slots in your tool table.
 o101 if [#<_tool_table_size> EQ 0]
-  (abort, ATCI:2|Missing tool table|Tool table not enabled in controller firmware.)
+  (abort, ATCI:1|Missing tool table|Tool table not enabled in controller firmware.)
 o101 endif
 
 (debug, Table size: #<_tool_table_size>)
