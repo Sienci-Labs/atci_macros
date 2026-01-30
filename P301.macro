@@ -19,6 +19,10 @@ G65P509;
 o130 if [#<selected_tool_cache> LE 0 OR #<selected_tool_cache> GT #<_tool_table_size>] 
     (abort, Invalid tool number)
 o130 endif
+
+;Check pressure with helper function
+G65 P501
+
 ; ************ PAUSE VALIDATION ************
 
 ; ************ BEGIN SETUP ************
@@ -50,12 +54,10 @@ G21 G90
 ; *************** END SETUP ****************
 
 ; *************** CONTINUE VALIDATION ****************
-; Movements based validation
-;Check pressure with helper function
-G65P501
+; Movements based validation (i.e. checks that may involve movement)
 
 ; Check rack sync with helper function
-G65P502
+G65 P502
 ; *************** END VALIDATION ****************
 
 ; *************** STAGING ****************

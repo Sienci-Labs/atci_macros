@@ -5,6 +5,7 @@
 #<_current_slot> = 1;
 
 ; ************ BEGIN VALIDATION ************
+
 ;Check initializing
 G65P507;
 
@@ -13,6 +14,27 @@ G65P508;
 
 ; Check tool changer parameters
 G65P509;
+
+; Check rack size
+G4 P0
+o100 if [#<_tc_slots> EQ 0]
+  (abort, ATCI:1|Rack not configured|Configure your ATC with a rack to continue.)
+o100 endif
+G4 P0
+; Check offset mode
+o101 if [#<_ort_offset_mode> EQ 0]
+  (abort, ATCI:1|Offsets probed after loading|Configure your ATC to use stored tool table offsets to continue.)
+o101 endif
+G4 P0
+; Check rack presence
+M66 P[#<_tc_input_rack>] L4 Q0.01
+o102 if [#5399 EQ -1]
+  (abort, ATCI:1|Rack not present|Reinstall the rack to continue.)
+o102 endif
+G4 P0.1
+
+;Check pressure with helper function
+G65 P501
 
 ; ************ PAUSE VALIDATION ************
 
@@ -45,12 +67,10 @@ G21 G90
 ; *************** END SETUP ****************
 
 ; *************** CONTINUE VALIDATION ****************
-; Movements based validation
-;Check pressure with helper function
-G65P501
+; Movements based validation (i.e. checks that may involve movement)
 
 ; Check rack sync with helper function
-G65P502
+G65 P502
 ; *************** END VALIDATION ****************
 
 ; *************** STAGING ****************
