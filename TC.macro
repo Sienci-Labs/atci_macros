@@ -252,10 +252,8 @@ o400 if [#<unload_mode> EQ 0]
       ;Close drawbar on error
       M65 P[#<_tc_output_db>]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
-      G53 G0 Z[#<_tc_safe_z>]
-      G4 P0
-      ; TODO Handle keepout exception
-      (abort, ATCI:1|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
+      G65 P506
+      (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
     o420 endif
 
     ; Move away from tool rack
@@ -269,8 +267,9 @@ o400 if [#<unload_mode> EQ 0]
     ; Check if tool is unloaded
     M66 P[#<_tc_input_tis>] L3 Q0.5
     o430 if [[#5399] EQ -1]
-      ; TODO Handle keepout exception 
-      (abort, ATCI:1|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage. - May chain on safe position unload recovery procedure in the future.)
+      ;TODO Add retry option
+      G65 P506
+      (abort, ATCI:2|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage.)
     o430 endif
 
     ; Move to safe height
@@ -405,9 +404,8 @@ o700 if [#<load_mode> EQ 0]
   o710 if [[#5399] EQ -1]
     ;Close drawbar on error
     M65 P[#<_tc_output_db>]
-    G53 G0 Z[#<_tc_safe_z>]
-    G4 P0
-    (abort, ATCI:1|Tool change error|Drawbar did not engage, compressor system may be offline or under pressure)
+    G65 P506
+    (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
   o710 endif
 
   G53 G1 Z[#<_tc_load_z>] F[#<_tc_z_dedust_feed>]
