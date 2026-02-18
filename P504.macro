@@ -1,7 +1,10 @@
 ; This is a helper function for moving to safe position from outside the keepout
 ; May be turned into a osub call in the future
 
-  G53 G0 Z[#<_tc_safe_z>]
-  G53 G0 Y[#<_tc_safe_y>]
-  G53 G0 X[#<_tc_safe_x>]
-  G4 P0;
+; Update and validate TLS / safe location
+G65 P512
+
+G53 G0 Z[#<_tc_safe_z>]
+G53 G0 Y[#<_tc_safe_y>]
+G53 G0 X[#<_tc_safe_x>]
+G4 P0;

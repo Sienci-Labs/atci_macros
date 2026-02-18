@@ -1,0 +1,11 @@
+; This is a helper function to update and validate TLS and safe location
+
+; X and Y machine coordinate positions of the tool setter.
+#<_tc_measure_x> = #5381
+(debug, Tool Measure X: #<_tc_measure_x>, from G59.3)
+#<_tc_measure_y> = #5382
+(debug, Tool Measure Y: #<_tc_measure_y>, from G59.3)
+
+#<_tc_safe_x> = #5381 ; X coordinate should be identical to the TLS
+#<_tc_safe_y> = -300 
+(debug, Safe Position: X#<_tc_safe_x> Y#<_tc_safe_y>)

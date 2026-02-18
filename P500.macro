@@ -4,6 +4,9 @@
 
 #<_probe_mode> = #17
 
+; Update and validate TLS / safe location
+G65 P512
+
 ;Move to tool length sensor
 G53 G0 Z[#<_tc_safe_z>]
 G53 G0 X[#<_tc_measure_x>]
