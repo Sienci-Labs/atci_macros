@@ -1,6 +1,9 @@
 ; This is a helper function for moving to the off rack tool position
 ; May be turned into a osub call in the future
 
+; Update and validate off rack position
+G65 P511
+
 G53 G0 Z[#<_tc_safe_z>]
 G53 G0 Y[#<_tc_off_rack_y>]
 G53 G0 X[#<_tc_off_rack_x>]

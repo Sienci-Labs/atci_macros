@@ -1,0 +1,7 @@
+; This is a helper function to update and validate off rack tool location
+
+; The X and Y machine coordinate positions for loading off rack tools
+#<_tc_off_rack_x> = #5361
+(debug, Off rack X: #<_tc_off_rack_x>, from G59.2)
+#<_tc_off_rack_y> = #5362
+(debug, Off rack Y: #<_tc_off_rack_y>, from G59.2)

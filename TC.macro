@@ -462,6 +462,7 @@ G4 P0
 o800 if [#<load_mode> EQ 0]
   ; Load happened in rack
     ; Exit rack
+    ; TODO Refactor such that sequential probes with empty holder position do not require exit of tool rack.
     G65 P506
     ; Re-enable keepout
     M960 P1;

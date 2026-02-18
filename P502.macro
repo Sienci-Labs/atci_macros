@@ -15,6 +15,8 @@ o100 else
       (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
       M0
       G53 G0 Z[#<_tc_safe_z>]
+      ; Update and validate off rack position
+      G65 P511;
       G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
     ; Move to off rack tool load / unload position
     o103 do
