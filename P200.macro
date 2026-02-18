@@ -73,7 +73,7 @@ o102 endif
 ; ******** Keepout ********
 ; The X and Y machine coordinate positions of slot 1.
 #<shoe_width> = 120
-#<fork_width> = #<_tc_slot_offset>
+#<fork_width> = 45
 #<shoe_depth> = 60
 #<fork_front_depth> = 30.5
 
