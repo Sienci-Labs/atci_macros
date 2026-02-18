@@ -277,6 +277,9 @@ o200 else
 
   ; Reapply tool offset at startup
   o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
+    ; M61 here to help G43 run properly
+    ; TODO Remove M61 after $REBOOT bug is fixed
+    M61 Q[#<_current_tool>]
     G43 H[#<_current_tool>]
     (debug, Tool offset for #<_current_tool> applied)
   o400 else
