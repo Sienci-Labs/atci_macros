@@ -230,6 +230,9 @@ o106 endif
 ; Turn off spindle, highly unlikely scenario
 M5
 
+; Disable tool change button (Typically turned on by manual tool change resets.)
+M65 P[#<_tc_output_bt>]
+
 ; ******** STARTUP CHECK ********
 ; Disable during initialization
 o200 if [EXISTS[#<_initializing>] EQ 1]
