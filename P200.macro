@@ -175,6 +175,10 @@ o103 endif
 #<_tc_retract_dist> = 2
 (debug, Tool Measure Retract Distance: #<_tc_retract_dist>)
 
+; The distance to probe in search of the tool setter for the subsequent probe.
+#<_tc_set_dist> = -3
+(debug, Tool Measure Set Distance: #<_tc_set_dist>)
+
 ; The feed rate for the initial probe.
 #<_tc_seek_feed> = 1000
 (debug, Tool Measure Seek Feed Rate: #<_tc_seek_feed>)

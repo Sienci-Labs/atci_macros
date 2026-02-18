@@ -18,6 +18,8 @@ o100 endif
 
 ; Touch-off
 G38.2 G91 Z[#<_tc_seek_dist>] F[#<_tc_seek_feed>]
+G0 G91 Z[#<_tc_retract_dist>]
+G38.2 G91 Z[#<_tc_set_dist>] F[#<_tc_set_feed>]
 G90
 
 ; Compute tool offset
@@ -41,6 +43,8 @@ o200 elseif [#<_probe_mode> EQ 1]
         G53 G0 Y[#<_tc_measure_y>]
         G53 G0 Z[#<_tc_measure_start_z>]
         G38.2 G91 Z[#<_tc_seek_dist>] F[#<_tc_seek_feed>]
+        G0 G91 Z[#<_tc_retract_dist>]
+        G38.2 G91 Z[#<_tc_set_dist>] F[#<_tc_set_feed>]
         G90
         ; Compute tool offset
         #<tool_offset> = [#[5203 + [#5220 * 20]] + #5063]
