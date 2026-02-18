@@ -5,3 +5,4 @@ G53 G0 Z[#<_tc_safe_z>]
 G53 G0 Y[#<_tc_y_pulloff>]
 G53 G0 X[#<_tc_safe_x>]
 G53 G0 Y[#<_tc_safe_y>]
+G4 P0;

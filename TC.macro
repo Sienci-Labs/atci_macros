@@ -219,17 +219,17 @@ o400 if [#<unload_mode> EQ 0]
           G1 G91 Z-0.1 F100
           G90
           #<current_probed_distance> = [#<current_probed_distance> + 0.1]
-          G4P0
+          G4 P0
           ;Added a 0.1 since there seems to be some caching issue with the loop.
       o411 while [[#5399] NE -1 AND #<current_probed_distance> LT [#<_tc_holder_sense_seek_z>-0.1]]
 
       o412 if [#<current_probed_distance> EQ #<_tc_holder_sense_seek_z>]
         (debug, No tool in tool holder, safe to unload current tool.)
       o412 else
-        G53 G0 Z[#<_tc_safe_z>]
-        G53 G0 Y[#<_tc_y_pulloff>]
-        ; TODO Add keepout handling or a retry loop
-       (abort, ATCI:1|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again)
+        ; Exit keepout
+        G65P506;
+        ; TODO Add a retry loop
+       (abort, ATCI:2|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again)
       o412 endif
       #<current_probe_offset> = 0;
 
@@ -245,32 +245,31 @@ o400 if [#<unload_mode> EQ 0]
     ; Release drawbar
     M64 P[#<_tc_output_db>]
     ; Allow for all air to vent in case there is residule pressure in the system
-    G4P0.8
+    G4 P0.8
     ; Verify drawbar release
     M66 P[#<_tc_input_db>] L4 Q0.5
     o420 if [[#5399] EQ -1]
       ;Close drawbar on error
       M65 P[#<_tc_output_db>]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
-      G53 G0 Z[#<_tc_safe_z>]
-      G4P0
-      ; TODO Handle keepout exception
-      (abort, ATCI:1|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
+      G65 P506
+      (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
     o420 endif
 
     ; Move away from tool rack
     G4 P0.2
     G53 G1 Z[#<_tc_load_z> + #<_tc_dedust_z_offset>] F[#<_tc_z_dedust_feed>]
-    G4P0
+    G4 P0
     ; Drawbar off
     M65 P[#<_tc_output_db>]
-    G4P0.5
+    G4 P0.5
 
     ; Check if tool is unloaded
     M66 P[#<_tc_input_tis>] L3 Q0.5
     o430 if [[#5399] EQ -1]
-      ; TODO Handle keepout exception 
-      (abort, ATCI:1|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage. - May chain on safe position unload recovery procedure in the future.)
+      ;TODO Add retry option
+      G65 P506
+      (abort, ATCI:2|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage.)
     o430 endif
 
     ; Move to safe height
@@ -280,13 +279,13 @@ o400 elseif [#<unload_mode> EQ 1]
   (debug, Unloading off rack tool)
     ; Pause as long as the tool is not removed
     o440 do
-      G4P0
+      G4 P0
       (print, ATCI:0|Action Required|Remove off rack tool using the drawbar button)
-      G4P0
+      G4 P0
       M64 P[#<_tc_output_bt>]
       M0
       M66 P[#<_tc_input_tis>] L3 Q0.05
-      G4P0.1
+      G4 P0.1
     o440 while [[#5399] EQ -1]
     M65 P[#<_tc_output_bt>]
 o400 else
@@ -307,7 +306,7 @@ o500 if [#<probing> EQ 0 AND #<unload_mode> NE -1 AND #<unload_offset_mode> EQ 0
 o500 endif
 
 M61 Q[#<_empty_tool>]
-G4P0
+G4 P0
 G49
 (debug, Tool length offset cleared, vacant tool number applied)
 
@@ -394,20 +393,19 @@ o700 if [#<load_mode> EQ 0]
   G53 G0 Y[#<tc_y_load>]
   G53 G0 X[#<tc_x_load>]
   G53 G0 Z[#<_tc_load_z> + #<_tc_dedust_z_offset>]
-  G4P0.1
+  G4 P0.1
 
   ; Release drawbar
   M64 P[#<_tc_output_db>]
   ; Allow for all air to vent in case there is residule pressure in the system
-  G4P0.8
+  G4 P0.8
   ; Verify drawbar release
   M66 P[#<_tc_input_db>] L4 Q0.5
   o710 if [[#5399] EQ -1]
     ;Close drawbar on error
     M65 P[#<_tc_output_db>]
-    G53 G0 Z[#<_tc_safe_z>]
-    G4P0
-    (abort, ATCI:1|Tool change error|Drawbar did not engage, compressor system may be offline or under pressure)
+    G65 P506
+    (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
   o710 endif
 
   G53 G1 Z[#<_tc_load_z>] F[#<_tc_z_dedust_feed>]
@@ -424,8 +422,10 @@ o700 if [#<load_mode> EQ 0]
       (debug, Tool #<selected_tool_cache> empty in probe mode)
       #<selected_tool_cache> = #<_empty_tool>
     o721 else
-      G53 G0 Z[#<_tc_safe_z>]
-      (abort, ATCI:1|Tool #<selected_tool_cache> not loaded, tool holder not in rack or is out of reach by the spindle. Place tool into tool rack to continue.)
+      ;Exit Keepout
+      G65 P506;
+      ;TODO Add retry option
+      (abort, ATCI:2|Tool #<selected_tool_cache> not loaded|Tool holder not in rack or is out of reach by the spindle. Make sure a tool is in the rack and your rack position is set properly.)
     o721 endif
   o720 else
     ;Tool change is successful, pulloff
@@ -437,13 +437,13 @@ o700 elseif [#<load_mode> EQ 1]
   (debug, Loading off rack tool)
   ; Pause as long as the tool is not removed
   o730 do
-    G4P0
+    G4 P0
     (print, ATCI:0|Action Required|Install off rack tool using drawbar button)
-    G4P0
+    G4 P0
     M64 P[#<_tc_output_bt>]
     M0
     M66 P[#<_tc_input_tis>] L4 Q0.05
-    G4P0.1
+    G4 P0.1
   o730 while [[#5399] EQ -1]
   M65 P[#<_tc_output_bt>]
 
@@ -453,7 +453,7 @@ o700 endif
 
 ; Change current tool number
 M61 Q[#<selected_tool_cache>]
-G4P0
+G4 P0
 
 (debug, Load Complete)
 ; ************ END LOAD ************

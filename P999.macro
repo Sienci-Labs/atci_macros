@@ -1,16 +1,17 @@
 ; This is the firmware configuration file that governs the application of firmware values required to operate the Sienci ATCi system.
 ; Asterisks (*) indicate non ATC specific firmware settings
 
+; ******** INITIALIZING ********
+; Flag to indicate initialization, will skip all error checking and prevent unintentional code execution for the current session.
+#<_initializing> = 1;
+
 ; ******** TOOL CHANGER SETTINGS ********
 ; xxxxxxxx GENERAL CONFIG xxxxxxxx
 (print, Applying tool changer settings)
 $485 = 1;       Keep tool number over reboot
 $675 = 3;       Execute M6T0 and Fail M6 if tc.macro is not found
+
 ; xxxxxxxx PIN CONFIG xxxxxxxx
-G65P1Q370;
-(debug, 370 #<_value>)
-G65P1Q372;
-(debug, 372 #<_value>)
 $370 = 0;       Invert I/O Port inputs (TODO: Not override unrrelated bitfields)
 $372 = 1;       Invert I/O Port outputs (TODO: Not override unrrelated bitfields)
 
@@ -48,31 +49,36 @@ $$
 G4P0;
 
 ; ******** STARTUP RELATED SETTINGS ********
-; Flag to indicate initialization, will skip all error checking and prevent unintentional code execution
-#<_initializing> = 1;
 (print, Applying startup related settings)
 $N1=G65P100
 G4P0.5
 $N0=G65P200
 G4P0.5
 
-; ******** CLEAR SPINDLE NOSE ********
+; ******** APPLY MANUAL TOOL CHANGE OFFSET ********
+G65P1Q130
+#<manual_x_pos> = [#<_value> - 50]
+G65P1Q131
+#<manual_y_pos> = [-0.6 * #<_value>]
 
+G10 L2 P8 X[#<manual_x_pos>] Y[#<manual_y_pos>] Z0
+
+(print, Default manual tool change position set to X: #<manual_x_pos> | Y: #<manual_y_pos> | Z: 0)
+
+; ******** CLEAR SPINDLE NOSE ********
 ; Check tool changer setup
 G65P509;
 
 ;TODO Clear spindle nose
-M66 P[#<_tc_input_tis>] L4 Q0.5
-o200 if [[#5399] EQ -1]
-o200 else
+M66 P[#<_tc_input_tis>] L4 Q0.05
+o200 if [[#5399] NE -1]
     o201 do
         (print, ATCI:0|Action Required|Remove tool using the drawbar button)
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
         M66 P[#<_tc_input_tis>] L4 Q0.05
-        G4P0.1
-    o201 while [[#5399] EQ -1]
+    o201 while [[#5399] NE -1]
     M65 P[#<_tc_output_bt>]
 o200 endif
 

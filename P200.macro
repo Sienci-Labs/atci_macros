@@ -11,8 +11,11 @@ o100 endif
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
-#<_tc_table_size> = 32
-(debug, Table size: #<_tc_table_size>)
+o101 if [#<_tool_table_size> EQ 0]
+  (abort, ATCI:1|Missing tool table|Tool table not enabled in controller firmware.)
+o101 endif
+
+(debug, Table size: #<_tool_table_size>)
 
 ; ******** OFFSET BEHAVIOR SETUP ********
 ; On and Off Rack Offset Management Modes defined by variables #<_irt_offset_mode> and #<_ort_offset_mode>
@@ -25,11 +28,13 @@ o100 endif
 ;#<_irt_offset_mode> = 2; Enable for Ad-hoc definition.
 ;#<_ort_offset_mode> = 0; Enable for Ad-hoc definition.
 
-o101 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
+o102 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again)
-o101 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
+o102 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
-o101 endif
+o102 endif
+
+(debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode>)
 
 ; ******** COORDINATES SETUP ********
 
@@ -44,9 +49,9 @@ o101 endif
 ; The slot offset for your rack. Defined by variables #<_tc_slot_offset>. Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
-o102 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
+o103 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
-o102 endif
+o103 endif
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
@@ -78,18 +83,27 @@ o102 endif
 #<fork_front_depth> = 30.5
 
 #<keepout_x_min> = [#<_tc_slot_one_x> - #<shoe_width> / 2 - #<fork_width> / 2]
-(print, #<keepout_x_min>)
+(print, Keepout X min: #<keepout_x_min>)
 #<keepout_x_max> = [#<_tc_slot_one_x> + [#<_tc_slots> - 1] * #<_tc_slot_offset> + #<shoe_width> / 2 + #<fork_width> / 2]
-(print, #<keepout_x_max>)
+(print, Keepout X max: #<keepout_x_max>)
 #<keepout_y_min> = [#<_tc_slot_one_y> - #<fork_front_depth> - #<shoe_depth>]
-(print, #<keepout_y_min>)
+(print, Keepout Y min: #<keepout_y_min>)
 #<keepout_y_max> = 0
-(print, #<keepout_y_max>)
+(print, Keepout Y max #<keepout_y_max>)
 
-;G65P1Q684S[#<keepout_x_min>]
-;G65P1Q686S[#<keepout_x_max>]
-;G65P1Q685S-10
-;G65P1Q687S[#<keepout_y_max>]
+G65P1Q684S[#<keepout_x_min>]
+G65P1Q686S[#<keepout_x_max>]
+G65P1Q685S[#<keepout_y_min>]
+G65P1Q687S[#<keepout_y_max>]
+
+; Keepout feature on/off
+o103 if [#<_tc_slots> EQ 0]
+  (print, Keepout Feature: 0)
+  G65P1Q683S0;
+o103 else
+  (print, Keepout Feature: 1)
+  G65P1Q683S3;
+o103 endif
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
@@ -175,9 +189,9 @@ o102 endif
 
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
-o103 if [[EXISTS[#<_holder_sense>]] EQ 0]
+o105 if [[EXISTS[#<_holder_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
-o103 endif
+o105 endif
 (debug, Tool Holder Sensor: #<_holder_sense>)
 
 ; Tool holder sensor Y offset relative to spindle center line
@@ -193,9 +207,9 @@ o103 endif
 
 ; ******** PRESSURE SENSOR CONTROL ********
 
-o104 if [[EXISTS[#<_pres_sense>]] EQ 0]
+o106 if [[EXISTS[#<_pres_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
-o104 endif
+o106 endif
 (debug, Pressure Sensor: #<_pres_sense>)
 
 ; ******** SYSTEM VARIABLES ********
@@ -216,6 +230,8 @@ M5
 ; Disable during initialization
 o200 if [EXISTS[#<_initializing>] EQ 1]
   (print, Initializing, all checks skipped)
+  ; ******** DISABLE KEEPOUT ********
+  M960 P0
 o200 else
   ;Check homed state
   o300 if [#<_homed_state> NE 1]
@@ -226,7 +242,7 @@ o200 else
   M66 P[#<_tc_input_tis>] L4 Q0.5
 
   o310 if [[#5399] EQ -1]
-    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
       (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
       M61 Q[#<_empty_tool>]
       M0
@@ -253,13 +269,16 @@ o200 else
   ; ******** APPLY TOOL OFFSET ********
 
   ; Reapply tool offset at startup
-  o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tc_table_size>]
+  o400 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
     G43 H[#<_current_tool>]
     (debug, Tool offset for #<_current_tool> applied)
   o400 else
     G49
     (debug, Tool not in holder, offsets cleared)
   o400 endif
+
+  ; ******** ENABLE KEEPOUT ********
+  M960 P1
 
 o200 endif
 
@@ -278,6 +297,6 @@ o200 endif
 #1004 = 0
 
 ; ********SENDER COMMUNICATIONS ********
-(print,ATCI|table_size:#<_tc_table_size>|rack_size:#<_tc_slots>)
+(print,ATCI|table_size:#<_tool_table_size>|rack_size:#<_tc_slots>)
 
 M99

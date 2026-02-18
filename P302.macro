@@ -250,7 +250,7 @@ G4 P0
 M0
 
 ;Return units to inch if previously set
-o201 if [#<setUnits>]
+o201 if [#<setUnits> EQ 1]
     G20
 o201 endif
 
@@ -259,6 +259,6 @@ o201 endif
 ;Move to safe home position
 (print, Moving to safe home position...)
 $H
-
+(print, ATCI|rack_set:1)
 ;End of Macro
 M99
