@@ -41,17 +41,23 @@ o102 endif
 ; ******** XY Axis ********
 ; The X and Y machine coordinate positions of slot 1.
 
+o103 if [[[#5341 EQ 0] OR [#5342 EQ 0] OR [#5343 GE 0]] AND [#<_initializing> EQ 0] AND [#<_tc_slots> NE 0]]
+  (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, please set a valid rack location before proceeding.)
+o103 endif
+
 #<_tc_slot_one_x> = #5341
 (debug, Slot 1 X: #<_tc_slot_one_x> from G59.1)
 #<_tc_slot_one_y> = #5342
 (debug, Slot 1 Y: #<_tc_slot_one_y> from G59.1)
 
+
+
 ; The slot offset for your rack. Defined by variables #<_tc_slot_offset>. Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
-o103 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
+o104 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
-o103 endif
+o104 endif
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
@@ -97,13 +103,13 @@ G65P1Q685S[#<keepout_y_min>]
 G65P1Q687S[#<keepout_y_max>]
 
 ; Keepout feature on/off
-o103 if [#<_tc_slots> EQ 0]
+o104 if [#<_tc_slots> EQ 0]
   (print, Keepout Feature: 0)
   G65P1Q683S0;
-o103 else
+o104 else
   (print, Keepout Feature: 1)
   G65P1Q683S3;
-o103 endif
+o104 endif
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
