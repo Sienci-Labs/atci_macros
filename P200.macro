@@ -41,8 +41,9 @@ o102 endif
 ; ******** XY Axis ********
 ; The X and Y machine coordinate positions of slot 1.
 
-o103 if [[[#5341 EQ 0] OR [#5342 EQ 0] OR [#5343 GE 0]] AND [#<_initializing> EQ 0] AND [#<_tc_slots> NE 0]]
-  (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, please set a valid rack location before proceeding.)
+;Check if slot location is valid
+o103 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
+    (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, please set a valid rack location before proceeding.)
 o103 endif
 
 #<_tc_slot_one_x> = #5341
@@ -50,14 +51,12 @@ o103 endif
 #<_tc_slot_one_y> = #5342
 (debug, Slot 1 Y: #<_tc_slot_one_y> from G59.1)
 
-
-
 ; The slot offset for your rack. Defined by variables #<_tc_slot_offset>. Defined in P100.macro, will abort if not defined.
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
-o104 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
+o105 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
-o104 endif
+o105 endif
 (debug, Slot Offset: #<_tc_slot_offset>)
 
 ; The X and Y machine coordinate positions for loading off rack tools
@@ -199,9 +198,9 @@ o104 endif
 
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
-o105 if [[EXISTS[#<_holder_sense>]] EQ 0]
+o106 if [[EXISTS[#<_holder_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
-o105 endif
+o106 endif
 (debug, Tool Holder Sensor: #<_holder_sense>)
 
 ; Tool holder sensor Y offset relative to spindle center line
@@ -217,9 +216,9 @@ o105 endif
 
 ; ******** PRESSURE SENSOR CONTROL ********
 
-o106 if [[EXISTS[#<_pres_sense>]] EQ 0]
+o107 if [[EXISTS[#<_pres_sense>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
-o106 endif
+o107 endif
 (debug, Pressure Sensor: #<_pres_sense>)
 
 ; ******** SYSTEM VARIABLES ********
