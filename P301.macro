@@ -4,7 +4,7 @@
 ; If it is an off rack tool, user must insert a tool
 
 ; Local variables
-#<selected_tool_cache> = #17;
+#<_301_tool_cache> = #17;
 
 ; ************ BEGIN VALIDATION ************
 ;Check initializing
@@ -16,7 +16,7 @@ G65P508;
 ; Check tool changer parameters
 G65P509;
 
-o130 if [#<selected_tool_cache> LE 0 OR #<selected_tool_cache> GT #<_tool_table_size>] 
+o130 if [#<_301_tool_cache> LE 0 OR #<_301_tool_cache> GT #<_tool_table_size>] 
     (abort, Invalid tool number)
 o130 endif
 
@@ -70,16 +70,18 @@ G65 P504
 
 ; ************ BEGIN TOOL CHANGE ************
 #1002 = 1
-M6T[#<selected_tool_cache>]
+M6T[#<_301_tool_cache>]
 #1002 = 0 ;Reset if tool change was not required
 
 (debug, Tool Change Complete)
-o200 if [#<_current_tool> EQ #<selected_tool_cache>]
+o200 if [#<_current_tool> EQ #<_301_tool_cache>]
     (debug, tool change successful, probing current tool)
     G65P500
 o200 else
     (debug, tool change unsuccessful, offset cleared)
-    G10 L1 P[#<selected_tool_cache>] Z0
+    G10 L1 P[#<_301_tool_cache>] Z0
+    ;TODO Add retry option
+    (abort, ATCI:2|Tool #<_301_tool_cache> not loaded|Tool holder not in rack or is out of reach by the spindle. Make sure a tool is in the rack and your rack position is set properly.)
 o200 endif
 
 ; ************ BEGIN RESTORE MODAL ************

@@ -164,6 +164,8 @@ G21 G90
 #<tc_start_z> = #5422
 (debug, Position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
 
+; TODO Disable feed overrive
+
 ; *************** END SETUP ****************
 
 ; *************** CONTINUE VALIDATION ****************
@@ -461,16 +463,20 @@ G4 P0
 ; *************** POSITION STAGING (POST LOAD) ****************
 o800 if [#<load_mode> EQ 0]
   ; Load happened in rack
-    ; Exit rack
-    ; TODO Refactor such that sequential probes with empty holder position do not require exit of tool rack.
-    G65 P506
-    ; Re-enable keepout
-    M960 P1;
-    G4 P0;
-    (debug, Enable keepout)
+  ; Exit rack
+  ; TODO Refactor such that sequential probes with empty holder position do not require exit of tool rack.
+  G65 P506
+  ; Re-enable keepout
+  M960 P1;
+  G4 P0;
+  (debug, Enable keepout)
 o800 elseif [#<load_mode> EQ 1]
   ; Load happened off rack
-  ; Hold position
+  ; Go to safe position
+  ; TODO Refactor position handling
+  o810 if [#<_abs_y> GE #<_tc_safe_y>]
+    G53 G0 Y[#<_tc_safe_y>]
+  o810 endif
 o800 else
   ; Loaded empty
   ; Hold position
@@ -521,6 +527,9 @@ o1000 endif
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 G[#<_tc_return_units>]
 (debug, Reapplying units #<_tc_return_units>)
+
+; xxxxxxxx RESTORE FEED OVERRIDE xxxxxxxx
+; TODO Enable feed overrive
 
 ; ************ END RESTORE MODAL ************
 
