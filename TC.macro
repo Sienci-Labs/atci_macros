@@ -235,7 +235,7 @@ o400 if [#<unload_mode> EQ 0]
       o412 endif
       #<current_probe_offset> = 0;
 
-      G53 G0 Z[#<_tc_safe_z>]
+      ;G53 G0 Z[#<_tc_safe_z>]
       G53 G0 Y[#<_tc_y_pulloff>]
     o410 endif
 
@@ -471,8 +471,8 @@ o800 if [#<load_mode> EQ 0]
   G4 P0;
   (debug, Enable keepout)
 o800 elseif [#<load_mode> EQ 1]
-  ; Load happened off rack
-  ; Go to safe position
+  ; Load happened off Rack
+  ; Could be next to rack, go to safe Y
   ; TODO Refactor position handling
   o810 if [#<_abs_y> GE #<_tc_safe_y>]
     G53 G0 Y[#<_tc_safe_y>]
