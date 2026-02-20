@@ -69,7 +69,7 @@ o105 endif
 ; TODO Refine the actual position
 
 #<_tc_safe_x> = #5381 ; X coordinate should be identical to the TLS
-#<_tc_safe_y> = -300 
+#<_tc_safe_y> = -200    ; Fixed value for now, can update to dynamic value based on rack keepouts at a later date once we vetted reliability.
 (debug, Safe Position: X#<_tc_safe_x> Y#<_tc_safe_y>)
 
 ; The Y machine coordinate positon for Y-axis pulloff.

@@ -4,7 +4,16 @@
 ; Update and validate off rack position
 G65 P511
 
+;Check current position < safe
+
 G53 G0 Z[#<_tc_safe_z>]
-G53 G0 Y[#<_tc_off_rack_y>]
+(debug, #<_abs_y>)
+o100 if [#<_abs_y> GE #<_tc_safe_y>]
+    G53 G0 Y[#<_tc_safe_y>]
+o100 endif
+
+; If so, safe Y, off rack x, off rack y
+; If not, does not matter
 G53 G0 X[#<_tc_off_rack_x>]
+G53 G0 Y[#<_tc_off_rack_y>]
 G4 P0;

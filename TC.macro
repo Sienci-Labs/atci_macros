@@ -515,7 +515,6 @@ o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
   ; Restore original position
   G0 X[#<tc_start_x>]
   G0 Y[#<tc_start_y>]
-  ;G0 Z[#<tc_start_z>]
 
 o1000 endif
 
