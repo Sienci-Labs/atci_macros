@@ -7,7 +7,6 @@ G65 P511
 ;Check current position < safe
 
 G53 G0 Z[#<_tc_safe_z>]
-(debug, #<_abs_y>)
 o100 if [#<_abs_y> GE #<_tc_safe_y>]
     G53 G0 Y[#<_tc_safe_y>]
 o100 endif
