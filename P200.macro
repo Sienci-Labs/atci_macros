@@ -19,6 +19,7 @@ o101 endif
 
 ; ******** OFFSET BEHAVIOR SETUP ********
 ; On and Off Rack Offset Management Modes defined by variables #<_irt_offset_mode> and #<_ort_offset_mode>
+; Passthrough mode offset management defined by variable #<_passthrough_offset_setting>
 ; Defined in P100.macro, will abort if not defined.
 
 ; 0: Always probe new offset
@@ -28,13 +29,19 @@ o101 endif
 ;#<_irt_offset_mode> = 2; Enable for Ad-hoc definition.
 ;#<_ort_offset_mode> = 0; Enable for Ad-hoc definition.
 
+; 0: Follow manual tools offset mode when rack is removed
+; 1: Follow rack loaded tools offset mode when rack is removed
+;#<_passthrough_offset_setting> = 0; Enable for Ad-hoc definition.
+
 o102 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again)
 o102 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
+o102 elseif [[EXISTS[#<_passthrough_offset_setting>]] EQ 0]
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_passthrough_offset_setting", rerun ATC setup and try again)
 o102 endif
 
-(debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode>)
+(debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode> | Passthrough: #<_passthrough_offset_setting>)
 
 ; ******** COORDINATES SETUP ********
 

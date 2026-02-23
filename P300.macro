@@ -23,7 +23,7 @@ o100 endif
 G4 P0
 ; Check offset mode
 o101 if [#<_irt_offset_mode> EQ 0]
-  (abort, ATCI:1|Offsets probed after loading|Configure your ATC to use stored tool table offsets to continue.)
+  (abort, ATCI:1|Probe All Function Disabled|Tools in the rack will be probed upon loading so there is no need to probe all tools beforehand. Go to "ATC Options" if you wish to change this behavior.)
 o101 endif
 G4 P0
 ; Check rack presence

@@ -101,21 +101,22 @@ o141 else
 o141 endif
 
 ; Check offset mode that applies
-  ; Use off rack unload setting when tool exceeds slot size or if the rack is removed
+  ; Use off rack unload setting when tool exceeds slot size or during passthrough (and rack offset modes not forced)
   ; Use in rack setting otherwise
   ; when not in probe mode,
   ; when empty tool is not selected, 
   ; When probe new offset every time is not enforced
 
-o160 if [#<_current_tool> GT #<_tc_slots> OR #<passthrough> EQ 1]
+
+o160 if [#<_current_tool> GT #<_tc_slots> OR [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> GT 0 AND #<passthrough> EQ 1 AND #<_passthrough_offset_setting> EQ 0]]
   #<unload_offset_mode> = #<_ort_offset_mode>
-o160 elseif [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> NE 0]
+o160 elseif [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> GT 0]
   #<unload_offset_mode> = #<_irt_offset_mode>
 o160 endif
 
-o161 if [#<selected_tool_cache> GT #<_tc_slots> OR #<passthrough> EQ 1]
+o161 if [#<selected_tool_cache> GT #<_tc_slots> OR [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> GT 0 AND #<passthrough> EQ 1 AND #<_passthrough_offset_setting> EQ 0]]
   #<load_offset_mode> = #<_ort_offset_mode>
-o161 elseif [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> NE 0]
+o161 elseif [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> GT 0]
   #<load_offset_mode> = #<_irt_offset_mode>
 o161 endif
 
