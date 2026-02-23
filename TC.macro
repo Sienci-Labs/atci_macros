@@ -183,7 +183,11 @@ o300 if [#<unload_mode> EQ 0]
   (debug, Disable keepout)
 o300 elseif [#<unload_mode> EQ 1]
   ; Move to off rack position
-  G65 P505
+  o310 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+    G65 P505 Q1
+  o310 else
+    G65 P505 Q0
+  o310 endif
 o300 else
   ; Hold position
 o300 endif
@@ -372,7 +376,12 @@ o600 else
   o630 elseif [#<load_mode> EQ 1]
     ; Load to happen off rack
     ; Move to off rack position
-    G65 P505
+    ; Move to off rack position
+    o631 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+      G65 P505 Q1
+    o631 else
+      G65 P505 Q0
+    o631 endif
   o630 else
     ; Loading empty
     ; Hold position
@@ -477,9 +486,14 @@ o800 if [#<load_mode> EQ 0]
 o800 elseif [#<load_mode> EQ 1]
   ; Load happened off Rack
   ; Move to safe area if probing is required
+  ; Move directly if rack does not exist or is not present
   ; Else hold position
   o810 if [#<probing> EQ 0 AND #<load_offset_mode> NE 1]
-    G65 P504
+    o811 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+      G65 P504 Q1
+    o811 else
+      G65 P504 Q0
+    o811 endif
   o810 endif
 o800 else
   ; Loaded empty
@@ -522,16 +536,20 @@ o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
   ; Move to safe Z
   G0 G53 Z[#<_tc_safe_z>]
 
-  ; Check current position > safe
-  o1010 if [#<_abs_y> GE #<_tc_safe_y>]
-    ; Current position adjacent to rack
-    G53 G0 Y[#<_tc_safe_y>]
-  o1010 endif
+  o1010 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+    ;Skip
+  o1010 elseif
+    ; Check current position > safe
+    o1011 if [#<_abs_y> GE #<_tc_safe_y>]
+      ; Current position adjacent to rack
+      G53 G0 Y[#<_tc_safe_y>]
+    o1011 endif
 
-  ; Check target position > safe
-  o1020 if [#<tc_start_y> GE #<_tc_safe_y>]
-    G0 X[#<tc_start_x>]
-  o1020 endif
+    ; Check target position > safe
+    o1012 if [#<tc_start_y> GE #<_tc_safe_y>]
+      G0 X[#<tc_start_x>]
+    o1012 endif
+  o1010 endif
   
   ; Restore original position
   G0 X[#<tc_start_x>]Y[#<tc_start_y>]

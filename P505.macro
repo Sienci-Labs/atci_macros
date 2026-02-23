@@ -1,5 +1,6 @@
 ; This is a helper function for moving to the off rack tool position
 ; May be turned into a osub call in the future
+#<direct> = #17
 
 ; Update and validate off rack position
 G65 P511
@@ -7,13 +8,13 @@ G65 P511
 G53 G0 Z[#<_tc_safe_z>]
 
 ; Check current position > safe
-o100 if [#<_abs_y> GE #<_tc_safe_y>]
+o100 if [#<_abs_y> GE #<_tc_safe_y> AND #<direct> NE 1]
     ; Current position adjacent to rack
     G53 G0 Y[#<_tc_safe_y>]
 o100 endif
 
 ; Check target position > safe
-o200 if [#<_tc_off_rack_y> GE #<_tc_safe_y>]
+o200 if [#<_tc_off_rack_y> GE #<_tc_safe_y> AND #<direct> NE 1]
     G53 G0 X[#<_tc_off_rack_x>]
 o200 endif
 
