@@ -129,6 +129,9 @@ o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   o171 endif
 o170 endif
 
+;Check pressure with helper function
+G65 P501
+
 ; ************ PAUSE VALIDATION ************
 
 ; ************ BEGIN SETUP ************
@@ -163,11 +166,9 @@ M50 P0
 
 ; *************** CONTINUE VALIDATION ****************
 ; Movements based validation
-;Check pressure with helper function
-G65P501
 
 ; Check rack sync with helper function
-G65P502
+G65 P502
 ; *************** END VALIDATION ****************
 
 ; *************** POSITION STAGING (UNLOAD) ****************

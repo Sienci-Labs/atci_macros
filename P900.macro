@@ -1,4 +1,4 @@
-;P900 Remove tool from spindle nose
+; P900 Remove tool from spindle nose
 ; Logically equivalent to unloading any tool with an off rack procedure
 (debug, Running P900 - Remove tool from nose)
 
