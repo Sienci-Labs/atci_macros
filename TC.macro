@@ -291,7 +291,7 @@ o400 elseif [#<unload_mode> EQ 1]
     ; Pause as long as the tool is not removed
     o440 do
       G4 P0
-      (print, ATCI:0|Action Required|Remove off rack tool using the drawbar button)
+      (print, ATCI:0|Action Required|Remove tool #<_current_tool> using the drawbar button.)
       G4 P0
       M64 P[#<_tc_output_bt>]
       M0
@@ -457,7 +457,7 @@ o700 elseif [#<load_mode> EQ 1]
   ; Pause as long as the tool is not removed
   o730 do
     G4 P0
-    (print, ATCI:0|Action Required|Install off rack tool using drawbar button)
+    (print, ATCI:0|Action Required|Install tool #<selected_tool_cache> with drawbar button)
     G4 P0
     M64 P[#<_tc_output_bt>]
     M0
@@ -542,7 +542,7 @@ o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
 
   o1010 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
     ;Skip
-  o1010 elseif
+  o1010 else
     ; Check current position > safe
     o1011 if [#<_abs_y> GE #<_tc_safe_y>]
       ; Current position adjacent to rack
