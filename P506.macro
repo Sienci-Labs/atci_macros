@@ -1,5 +1,4 @@
 ; This is a helper function for moving to safe position from inside the keepout
-; May be turned into a osub call in the future
 
 ; Update and validate TLS / safe location
 G65 P512

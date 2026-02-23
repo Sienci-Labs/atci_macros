@@ -90,13 +90,18 @@ o200 endif
 ; xxxxxxxx RESTORE POSITION xxxxxxxx
 ; Move to safe Z
 G0 G53 Z[#<_tc_safe_z>]
+
 ; Go to safe position
 G0 G53 X[#<_tc_safe_x>]
 G0 G53 Y[#<_tc_safe_y>]
 
+o300 if [#<_abs_y> GE #<_tc_start_y_301>]
+  ; Target position adjacent to rack
+  G0 X[#<_tc_start_x_301>]
+o300 endif
+
 (debug, Reapplying start coordinates #<_tc_start_x_301>, #<_tc_start_y_301>)
-G0 X[#<_tc_start_x_301>]
-G0 Y[#<_tc_start_y_301>]
+G0 X[#<_tc_start_x_301>] Y[#<_tc_start_y_301>]
 
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 (debug, Reapplying units #<_tc_return_units_301>)
@@ -107,5 +112,4 @@ G[#<_tc_return_units_301>]
 M50 P1
 
 ; ************ END RESTORE MODAL ************
-
 M99;

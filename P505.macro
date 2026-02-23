@@ -4,15 +4,19 @@
 ; Update and validate off rack position
 G65 P511
 
-;Check current position < safe
-
 G53 G0 Z[#<_tc_safe_z>]
+
+; Check current position < safe
 o100 if [#<_abs_y> GE #<_tc_safe_y>]
+    ; Current position adjacent to rack
     G53 G0 Y[#<_tc_safe_y>]
 o100 endif
 
-; If so, safe Y, off rack x, off rack y
-; If not, does not matter
-G53 G0 X[#<_tc_off_rack_x>]
-G53 G0 Y[#<_tc_off_rack_y>]
+; Check target position < safe
+o200 if [#<_abs_y> GE #<_tc_off_rack_y>]
+    G53 G0 X[#<_tc_off_rack_x>]
+o200 endif
+
+; If both positions are < safe, direct movement
+G53 G0 X[#<_tc_off_rack_x>] Y[#<_tc_off_rack_y>]
 G4 P0;

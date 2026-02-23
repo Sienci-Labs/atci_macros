@@ -108,6 +108,7 @@ M6T0;
 ; xxxxxxxx RESTORE POSITION xxxxxxxx
 ; Move to safe Z
 G0 G53 Z[#<_tc_safe_z>]
+
 ; Go to safe position
 G0 G53 X[#<_tc_safe_x>]
 G0 G53 Y[#<_tc_safe_y>]
