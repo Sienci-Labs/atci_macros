@@ -521,13 +521,14 @@ o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
   ; Move to safe Z
   G0 G53 Z[#<_tc_safe_z>]
 
+  ; Check safe > current position 
   o1010 if [#<_abs_y> GE #<_tc_safe_y>]
     ; Current position adjacent to rack
     G53 G0 Y[#<_tc_safe_y>]
   o1010 endif
 
-  o1020 if [#<_abs_y> GE #<tc_start_y>]
-    ; Target position adjacent to rack
+  ; Check target position > safe
+  o1020 if [#<tc_start_y> GE #<_tc_safe_y>]
     G0 X[#<tc_start_x>]
   o1020 endif
   

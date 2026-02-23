@@ -6,7 +6,7 @@ G65 P512
 
 G53 G0 Z[#<_tc_safe_z>]
 
-; Check current position < safe
+; Check current position > safe
 o100 if [#<_abs_y> GE #<_tc_safe_y>]
     ; Current position adjacent to rack
     G53 G0 Y[#<_tc_safe_y>]
