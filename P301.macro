@@ -96,7 +96,7 @@ G0 G53 X[#<_tc_safe_x>]
 G0 G53 Y[#<_tc_safe_y>]
 
 ; Check target position > safe
-o300 if [#<_tc_start_y_301> GE #<_abs_y>]
+o300 if [#<_tc_start_y_301> GE #<_tc_safe_y>]
   G0 X[#<_tc_start_x_301>]
 o300 endif
 
