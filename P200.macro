@@ -293,7 +293,12 @@ o200 else
   o400 endif
 
   ; ******** ENABLE KEEPOUT ********
+  ; This re-enables keepout in case of a reset
   M960 P1
+
+    ; ******** ENABLE FEED OVERRIDE ********
+  ; This re-enables feed override in case of a reset
+  M50 P1
 
 o200 endif
 

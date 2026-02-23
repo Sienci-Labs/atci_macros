@@ -146,14 +146,6 @@ o210 else
 o210 endif
 (debug, Units recorded)
 
-; Record current units
-o220 if [#<_metric> EQ 0]
-  #<_tc_return_units> = 20
-o220 else
-  #<_tc_return_units> = 21
-o220 endif
-(debug, Units recorded)
-
 ; Force metric
 G21 G90
 (debug, Change to metric mode)
@@ -164,7 +156,8 @@ G21 G90
 #<tc_start_z> = #5422
 (debug, Position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
 
-; TODO Disable feed overrive
+; Feed override Off
+M50 P0
 
 ; *************** END SETUP ****************
 
@@ -228,8 +221,9 @@ o400 if [#<unload_mode> EQ 0]
       o412 if [#<current_probed_distance> EQ #<_tc_holder_sense_seek_z>]
         (debug, No tool in tool holder, safe to unload current tool.)
       o412 else
-        ; Exit keepout
-        G65P506;
+        ; Exit keepout and re-enable feed override
+        G65 P506
+        M50 P1
         ; TODO Add a retry loop
        (abort, ATCI:2|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again)
       o412 endif
@@ -254,7 +248,9 @@ o400 if [#<unload_mode> EQ 0]
       ;Close drawbar on error
       M65 P[#<_tc_output_db>]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
+      ; Exit keepout and re-enable feed override
       G65 P506
+      M50 P1
       (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
     o420 endif
 
@@ -271,6 +267,9 @@ o400 if [#<unload_mode> EQ 0]
     o430 if [[#5399] EQ -1]
       ;TODO Add retry option
       G65 P506
+      ; Exit keepout and re-enable feed override
+      G65 P506
+      M50 P1
       (abort, ATCI:2|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage.)
     o430 endif
 
@@ -406,7 +405,9 @@ o700 if [#<load_mode> EQ 0]
   o710 if [[#5399] EQ -1]
     ;Close drawbar on error
     M65 P[#<_tc_output_db>]
+    ; Exit keepout and re-enable feed override
     G65 P506
+    M50 P1
     (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure)
   o710 endif
 
@@ -424,8 +425,9 @@ o700 if [#<load_mode> EQ 0]
       (debug, Tool #<selected_tool_cache> empty in probe mode)
       #<selected_tool_cache> = #<_empty_tool>
     o721 else
-      ;Exit Keepout
-      G65 P506;
+      ; Exit keepout and re-enable feed override
+      G65 P506
+      M50 P1
       ;TODO Add retry option
       (abort, ATCI:2|Tool #<selected_tool_cache> not loaded|Tool holder not in rack or is out of reach by the spindle. Make sure a tool is in the rack and your rack position is set properly.)
     o721 endif
@@ -529,7 +531,8 @@ G[#<_tc_return_units>]
 (debug, Reapplying units #<_tc_return_units>)
 
 ; xxxxxxxx RESTORE FEED OVERRIDE xxxxxxxx
-; TODO Enable feed overrive
+;Restore feed override
+M50 P1
 
 ; ************ END RESTORE MODAL ************
 

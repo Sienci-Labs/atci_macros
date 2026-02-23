@@ -63,7 +63,9 @@ G21 G90
 #<_tc_start_z_300> = #5422
 (debug, Position before tool change: #<_tc_start_x_300>, #<_tc_start_y_300>, #<_tc_start_z_300>)
 
-(debug, Moved to safe position)
+; Feed override Off
+M50 P0
+
 ; *************** END SETUP ****************
 
 ; *************** CONTINUE VALIDATION ****************
@@ -113,6 +115,10 @@ G0 G53 Y[#<_tc_safe_y>]
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 (debug, Reapplying units #<_tc_return_units_300>)
 G[#<_tc_return_units_300>]
+
+; xxxxxxxx RESTORE FEED OVERRIDE xxxxxxxx
+;Restore feed override
+M50 P1
 
 ; ************ END RESTORE MODAL ************
 
