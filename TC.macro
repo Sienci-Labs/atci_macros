@@ -69,17 +69,11 @@ o133 else
   #<passthrough> = 1;
 o133 endif
 
-; Check if keepout should be disabled / enabled
-; Should setup a global flag to indicate if keepout should be maintained for this session
-; a separate helper function can be called to enable and disable the keepout bearing this global flag in mind;
-; For example, keepout should typically be enabled when entering the rack area, but this should be overridden if the global flag is false
-; Alternatively, keepout should be re-enabled when exiting the rack area, but again this should be overridden if the global flag
-o135 if [#<probing> EQ 0 AND #<passthrough> EQ 0]
+; Re-enable keepout unless rack is not present.
+; Keepout is turned off with P200 at startup should rack size equal to 0 so there is no need to disable it here.
+o135 if [#<passthrough> EQ 0]
   M960 P1;
   (print, Keepout enabled)
-o135 else
-  M960 P0;
-  (print, Keepout disabled)
 o135 endif
 
 ; Check if tool unload should be skipped because an empty tool is selected, or if passthrough mode is on, or if forcing a manual unload
