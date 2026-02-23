@@ -89,8 +89,7 @@ G49
 ; Check for rack configuration mis-match
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o300 if [#5399 NE -1 AND #<_tc_slots> LE 0]
-    (print, ATCI:0|Action Required|The rack sensor is triggered, but no rack is configured. Return to the previous page and select the correct rack configuration before continuing.)
-    M0
+    (abort, ATCI:1|Action Required|The rack sensor is triggered, but no rack is configured. Return to the previous page and select the correct rack configuration before continuing.)
 o300 endif
 
 M99
