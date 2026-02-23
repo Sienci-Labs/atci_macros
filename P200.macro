@@ -283,6 +283,12 @@ o200 else
     o312 endif
   o310 endif
 
+  ; Check for rack configuration mis-match
+  M66 P[#<_tc_input_rack>] L4 Q0.01
+  o320 if [#5399 NE -1 AND #<_tc_slots> LE 0]
+    (abort, ATCI:1|Tool changer failed to initialize|Rack is present but is not configured. Visit ATC Setup to configure your rack and try again.)
+  o320 endif
+
   ; ******** APPLY TOOL OFFSET ********
 
   ; Reapply tool offset at startup

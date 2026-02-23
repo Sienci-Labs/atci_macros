@@ -59,6 +59,10 @@ G65P509;
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o133 if [#5399 NE -1]
   ; Rack present
+  ; Check for rack configuration mis-match
+  o134 if [#<_tc_slots> LE 0]
+    (abort, ATCI:2|Tool change aborted|Rack is present but is not configured. Visit ATC Setup to configure your rack and try again.)
+  o134 endif;
   #<passthrough> = 0;
 o133 else
   ; Rack not present
@@ -70,13 +74,13 @@ o133 endif
 ; a separate helper function can be called to enable and disable the keepout bearing this global flag in mind;
 ; For example, keepout should typically be enabled when entering the rack area, but this should be overridden if the global flag is false
 ; Alternatively, keepout should be re-enabled when exiting the rack area, but again this should be overridden if the global flag
-o134 if [#<probing> EQ 0 AND #<passthrough> EQ 0]
+o135 if [#<probing> EQ 0 AND #<passthrough> EQ 0]
   M960 P1;
   (print, Keepout enabled)
-o134 else
+o135 else
   M960 P0;
   (print, Keepout disabled)
-o134 endif
+o135 endif
 
 ; Check if tool unload should be skipped because an empty tool is selected, or if passthrough mode is on, or if forcing a manual unload
 o140 if [#<_current_tool> EQ #<_empty_tool>]
