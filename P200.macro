@@ -3,7 +3,7 @@
 (debug, Minimum firmware version: #<_min_vminor>)
 
 o100 if [#<_vminor> LT #<_min_vminor>]
-  (abort, ATCI:1|Controller firmware version out of date|Update to version <#<_min_vminor>> or above and try again.)
+  (abort, ATCI:1|Controller firmware version out of date|Update to version #<_min_vminor> or above and try again.)
 0100 endif
 
 ; ******** BEGIN USER CONFIGURATION ********
