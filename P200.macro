@@ -1,3 +1,11 @@
+; ******** SYSTEMS SETUP ********
+#<_min_vminor> = 260221
+(debug, Minimum firmware version: #<_min_vminor>)
+
+o100 if [#<_vminor> LT #<_min_vminor>]
+  (abort, ATCI:1|Controller firmware version out of date|Update to version <#<_min_vminor>> or above and try again.)
+0100 endif
+
 ; ******** BEGIN USER CONFIGURATION ********
 
 ; ******** BASIC SETUP ********
@@ -5,15 +13,15 @@
 ; The number of slots in your magazine. Defined in P100.macro, will abort if not defined.
 ;#<_tc_slots> = 6; Enable for Ad-hoc definition.
 
-o100 if [[EXISTS[#<_tc_slots>]] EQ 0]
+o101 if [[EXISTS[#<_tc_slots>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slots", rerun ATC setup and try again)
-o100 endif
+o101 endif
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
-o101 if [#<_tool_table_size> EQ 0]
+o102 if [#<_tool_table_size> EQ 0]
   (abort, ATCI:1|Missing tool table|Tool table not enabled in controller firmware.)
-o101 endif
+o102 endif
 
 (debug, Table size: #<_tool_table_size>)
 
@@ -33,13 +41,13 @@ o101 endif
 ; 1: Follow rack loaded tools offset mode when rack is removed
 ;#<_passthrough_offset_setting> = 0; Enable for Ad-hoc definition.
 
-o102 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
+o103 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again)
-o102 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
+o103 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
-o102 elseif [[EXISTS[#<_passthrough_offset_setting>]] EQ 0]
+o103 elseif [[EXISTS[#<_passthrough_offset_setting>]] EQ 0]
   (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_passthrough_offset_setting", rerun ATC setup and try again)
-o102 endif
+o103 endif
 
 (debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode> | Passthrough: #<_passthrough_offset_setting>)
 
@@ -49,9 +57,9 @@ o102 endif
 ; The X and Y machine coordinate positions of slot 1.
 
 ;Check if slot location is valid
-o103 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
+o104 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
     (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, please set a valid rack location before proceeding.)
-o103 endif
+o104 endif
 
 #<_tc_slot_one_x> = #5341
 (debug, Slot 1 X: #<_tc_slot_one_x> from G59.1)
@@ -232,9 +240,6 @@ o107 endif
 ; Assign tool 0 as empty
 #<_empty_tool> = 0
 (debug, Empty tool assigned to: T#<_empty_tool>)
-
-#<_comp_ver> = 20250618
-(debug, Compatible version: #<_comp_ver>)
 
 ; ******** STARTUP ********
 
