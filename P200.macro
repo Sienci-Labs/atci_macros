@@ -3,7 +3,7 @@
 (debug, Minimum firmware version: #<_min_vminor>)
 
 o100 if [#<_vminor> LT #<_min_vminor>]
-  (abort, ATCI:1|Controller firmware version out of date|Update to version #<_min_vminor> or above and try again.)
+  (abort, ATCI:1|Controller firmware version out of date|Update to version #<_min_vminor> or above and try again. [A-200-01])
 o100 endif
 
 ; ******** BEGIN USER CONFIGURATION ********
@@ -14,13 +14,13 @@ o100 endif
 ;#<_tc_slots> = 6; Enable for Ad-hoc definition.
 
 o101 if [[EXISTS[#<_tc_slots>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slots", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slots", rerun ATC setup and try again. [A-200-03])
 o101 endif
 (debug, Slots: #<_tc_slots>)
 
 ; The number of slots in your tool table.
 o102 if [#<_tool_table_size> EQ 0]
-  (abort, ATCI:1|Missing tool table|Tool table not enabled in controller firmware.)
+  (abort, ATCI:1|Missing tool table|Tool table not enabled in controller firmware. [A-200-02])
 o102 endif
 
 (debug, Table size: #<_tool_table_size>)
@@ -42,11 +42,11 @@ o102 endif
 ;#<_passthrough_offset_setting> = 0; Enable for Ad-hoc definition.
 
 o103 if [[EXISTS[#<_irt_offset_mode>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_irt_offset_mode", rerun ATC setup and try again. [A-200-04])
 o103 elseif [[EXISTS[#<_ort_offset_mode>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_ort_offset_mode", rerun ATC setup and try again. [A-200-05])
 o103 elseif [[EXISTS[#<_passthrough_offset_setting>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_passthrough_offset_setting", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_passthrough_offset_setting", rerun ATC setup and try again. [A-200-06])
 o103 endif
 
 (debug, Offset Mode - Rack: #<_irt_offset_mode> | Manual: #<_ort_offset_mode> | Passthrough: #<_passthrough_offset_setting>)
@@ -58,7 +58,7 @@ o103 endif
 
 ;Check if slot location is valid
 o104 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
-    (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, please set a valid rack location before proceeding.)
+  (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, Setup your rack with a non-zero rack position before proceeding. [A-200-10])
 o104 endif
 
 #<_tc_slot_one_x> = #5341
@@ -70,7 +70,7 @@ o104 endif
 
 ;#<_tc_slot_offset> = 90; Enable for Ad-hoc definition.
 o105 if [[EXISTS[#<_tc_slot_offset>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_tc_slot_offset", rerun ATC setup and try again. [A-200-07])
 o105 endif
 (debug, Slot Offset: #<_tc_slot_offset>)
 
@@ -214,7 +214,7 @@ o104 endif
 ; ******** TOOL HOLDER SENSOR CONTROL ********
 
 o106 if [[EXISTS[#<_holder_sense>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_holder_sense", rerun ATC setup and try again. [A-200-08])
 o106 endif
 (debug, Tool Holder Sensor: #<_holder_sense>)
 
@@ -232,7 +232,7 @@ o106 endif
 ; ******** PRESSURE SENSOR CONTROL ********
 
 o107 if [[EXISTS[#<_pres_sense>]] EQ 0]
-  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again)
+  (abort, ATCI:1|Tool changer failed to initialize|Failed to find variable "_pres_sense", rerun ATC setup and try again. [A-200-09])
 o107 endif
 (debug, Pressure Sensor: #<_pres_sense>)
 
@@ -262,7 +262,7 @@ o200 if [EXISTS[#<_initializing>] EQ 1]
 o200 else
   ;Check homed state
   o300 if [#<_homed_state> NE 1]
-    (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue.)
+    (abort, ATCI:1|Machine not homed|Tool changer disabled, home your machine to continue. [W-200-01])
   o300 endif
 
   ; Check if state of the spindle is in sync with firmware
@@ -270,17 +270,17 @@ o200 else
 
   o310 if [[#5399] EQ -1]
     o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
-      (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number)
+      (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number. [U-200-01])
       M61 Q[#<_empty_tool>]
       M0
     o311 endif
   o310 else
     o312 if [#<_current_tool> EQ 0]
-        (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually)
+        (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually. [U-200-02])
         M0
         G53 G0 Z[#<_tc_safe_z>]
       o313 do
-        (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+        (print, ATCI:0|Action Required|Remove tool using the drawbar button. [U-200-03])
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
@@ -295,7 +295,7 @@ o200 else
   M66 P[#<_tc_input_rack>] L4 Q0.01
   o320 if [#5399 NE -1 AND #<_tc_slots> LE 0]
     o321 if [#<_tc_slots> LE 0]
-    (abort, ATCI:1|Tool changer failed to initialize|Rack is present but is not configured. Visit ATC Setup to configure your rack and try again.)
+    (abort, ATCI:1|Tool changer failed to initialize|Rack is present but is not configured. Visit ATC Setup to configure your rack and try again. [A-200-11])
     o321 endif
   o320 else
   ;Re-enable keepout unless rack is not present

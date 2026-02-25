@@ -73,7 +73,7 @@ G65P509;
 M66 P[#<_tc_input_tis>] L4 Q0.05
 o200 if [[#5399] NE -1]
     o201 do
-        (print, ATCI:0|Action Required|Remove tool using the drawbar button)
+        (print, ATCI:0|Action Required|Remove tool using the drawbar button. [U-999-01])
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
@@ -89,7 +89,7 @@ G49
 ; Check for rack configuration mis-match
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o300 if [#5399 NE -1 AND #<_tc_slots> LE 0]
-    (print, ATCI:1|Rack detected|The rack sensor is triggered, but no rack is specified. If you intend to use a rack with this tool changer, return to the previous page and select the correct rack configuration before continuing.)
+    (print, ATCI:1|Rack detected|The rack sensor is triggered, but no rack is specified. If you intend to use a rack with this tool changer, return to the previous page and select the correct rack configuration before continuing. [W-999-01])
 o300 endif
 
 M99
