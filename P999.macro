@@ -1,4 +1,4 @@
-; This is the firmware configuration file that governs the application of firmware values required to operate the Sienci ATCi system.
+; This is the firmware configuration file that governs the application of firmware values required to operate the Sienci ATC system.
 ; Asterisks (*) indicate non ATC specific firmware settings
 
 ; ******** INITIALIZING ********
@@ -89,7 +89,7 @@ G49
 ; Check for rack configuration mis-match
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o300 if [#5399 NE -1 AND #<_tc_slots> LE 0]
-    (abort, ATCI:1|Action Required|The rack sensor is triggered, but no rack is configured. Return to the previous page and select the correct rack configuration before continuing.)
+    (print, ATCI:1|Rack detected|The rack sensor is triggered, but no rack is specified. If you intend to use a rack with this tool changer, return to the previous page and select the correct rack configuration before continuing.)
 o300 endif
 
 M99
