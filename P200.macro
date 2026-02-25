@@ -250,6 +250,9 @@ M5
 ; Disable tool change button (Typically turned on by manual tool change resets.)
 M65 P[#<_tc_output_bt>]
 
+; Disable drawbar (Typically turned on by tool change resets.)
+M65 P[#<_tc_output_db>]
+
 ; ******** STARTUP CHECK ********
 ; Disable during initialization
 o200 if [EXISTS[#<_initializing>] EQ 1]
