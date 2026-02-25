@@ -58,6 +58,7 @@ o103 endif
 
 ;Check if slot location is valid
 o104 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
+    M960 P0
   (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, Setup your rack with a non-zero rack position before proceeding. [A-200-10])
 o104 endif
 
