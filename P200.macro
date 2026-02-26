@@ -59,7 +59,7 @@ o103 endif
 ;Check if slot location is valid
 o104 if [[EXISTS[#<_initializing>] NE 1] AND [#<_tc_slots> GT 0] AND [#5341 EQ 0 OR #5342 EQ 0 OR #5343 GE 0]]
     M960 P0
-  (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, Setup your rack with a non-zero rack position before proceeding. [A-200-10])
+  (abort, ATCI:1|Tool changer failed to initialize|Rack position not defined, run ATC setup and try again. [A-200-10])
 o104 endif
 
 #<_tc_slot_one_x> = #5341
@@ -267,30 +267,7 @@ o200 else
   o300 endif
 
   ; Check if state of the spindle is in sync with firmware
-  M66 P[#<_tc_input_tis>] L4 Q0.5
-
-  o310 if [[#5399] EQ -1]
-    o311 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
-      (print, ATCI:0|No tool in spindle, but tool #<_current_tool> is active|Resume to clear the currently active tool number. [U-200-01])
-      M61 Q[#<_empty_tool>]
-      M0
-    o311 endif
-  o310 else
-    o312 if [#<_current_tool> EQ 0]
-        (print, ATCI:0|Tool in spindle without active tool number|Resume to move to safe position and unload the tool manually. [U-200-02])
-        M0
-        G53 G0 Z[#<_tc_safe_z>]
-      o313 do
-        (print, ATCI:0|Action Required|Remove tool using the drawbar button. [U-200-03])
-        G4P0
-        M64 P[#<_tc_output_bt>]
-        M0
-        M66 P[#<_tc_input_tis>] L3 Q0.05
-        G4P0.1
-      o313 while [[#5399] EQ -1]
-      M65 P[#<_tc_output_bt>]
-    o312 endif
-  o310 endif
+  G65 P502
 
   ; Check for rack configuration mis-match
   M66 P[#<_tc_input_rack>] L4 Q0.01

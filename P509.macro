@@ -3,6 +3,10 @@
 
 G4 P0;
 o100 if [#1001 NE 1]
-  (abort, ATCI:2|Tool changer not initialized|Initialize the tool changer to continue)
+  o110 if [EXISTS[#<_initializing>] NE 1]
+    (abort, ATCI:2|Tool Change Aborted|The tool Changer is disabled due to unresolved ATC errors. Home the machine to reset the ATC, resolve any errors shown and try again. [A-509-01])
+  o110 else
+    (abort, ATCI:1|ATC Setup Aborted|The ATC setup macro P200.macro is missing or is corrupted. Return to ATC Setup and reload the macro files and try again. [A-509-02])
+  o110 endif
 o100 endif
 G4 P0;

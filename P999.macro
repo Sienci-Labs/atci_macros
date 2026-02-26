@@ -67,7 +67,7 @@ G10 L2 P8 X[#<manual_x_pos>] Y[#<manual_y_pos>] Z0
 
 ; ******** CLEAR SPINDLE NOSE ********
 ; Check tool changer setup
-G65P509;
+G65 P509;
 
 ;TODO Clear spindle nose
 M66 P[#<_tc_input_tis>] L4 Q0.05
