@@ -62,24 +62,19 @@ M66 P[#<_tc_input_rack>] L3 Q0.01
 G4 P0
 
 o102 if [#5399 NE -1]
-    (abort, ATCI:0|Rack Presence Sensor Error|Rack not Present or Rack Sensor is not detected. Please refer to trouble-shooting guide and retry)
-    M99
+    (abort, ATCI:1|Utility Aborted|The rack sensor does not detect a rack. Please ensure the tool rack is physically installed and the rack sensor is triggered, then trying again. [A-302-01])
 o102 endif
 
 ;check for rack configuration
 ;#<_tc_slots> -> points to rack arrangment 6 or 12
-o103 if [EXISTS[#<_tc_slots>]]
-    o201 if [#<_tc_slots> EQ 6]
-        (print, Configured for 6 Tool: Rack Mode 0)
-        #<rackMode> = 0
-    o201 elseif [#<_tc_slots> EQ 12]
-        (print, Configured for 12 Tool: Rack Mode 1)
-        #<rackMode> = 1
-    o201 else
-        (abort, ATCI:0|Rack Configuration Error|Rack configuration does not match the expected values of 6 or 12 tool slots. Please refer to trouble-shooting guide and retry.)
-    o201 endif
+o103 if [#<_tc_slots> EQ 6]
+    (print, Configured for 6 Tool: Rack Mode 0)
+    #<rackMode> = 0
+o103 elseif [#<_tc_slots> EQ 12]
+    (print, Configured for 12 Tool: Rack Mode 1)
+    #<rackMode> = 1
 o103 else
-    (abort, ATCI:0|Rack Configuration Error|Unexpected Setup Configuration, Please do first time setup before proceeding.)
+    (abort, ATCI:1|Utility Aborted|The current configuration does not match a standard 6-slot or 12-slot rack. This utility does not currently support custom or modified rack layouts. Please adjust your configuration and try again. [A-302-02])
 o103 endif
 
 ;check probe in starting position
@@ -87,8 +82,7 @@ G4 P0
 M66 P[#<_tc_input_th>] L4 Q0.01
 G4 P0
 o104 if [#5399 EQ -1]
-    (abort, ATCI:1|Stud-Finder Sensor not pre-positioned above pull-stud correctly|Please reposition to 1mm above pull-stud - Ensure that the Stud-Finder sensor light is illuminated and retry.)
-    M99
+    (abort, ATCI:1|Utility Aborted|The Stud-Finder must be pre-triggered to start the utility. Jog the spindle until the sensor is ~1mm above pull-stud and the indicator LED is on, then try again. [A-302-03])
 o104 endif
 
 (print, Disabling safe keepouts...)
@@ -96,7 +90,7 @@ M960 P0
 G4 P0.1
 
 ;Begin Probing Sequence
-(print, ATCI:1|Begin Rack Probing Sequence?|Will Probe Position of Tool Holders. Caution: safe keepouts will be disabled during probing, be prepared to e-stop if necessary.)
+(print, ATCI:0|Machine Movement Caution|The machine is about to perform an automated routine to determine rack position. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-01])
 M0
 
 ;Initialize staring position for determining Z height offset when probing x and y
@@ -113,8 +107,9 @@ G65 P510
 #<_ZPrbSensitivity> = [0.8 * ABS[#<_ZPrb> - #<startZ>]]
 
 ;rough position over second pullstud based on tool offset spacing
-(print, ATCI:1|Probe the next pull-stud?)
+(print, ATCI:0|Pull-stud Position Found|The center of the current pull-stud has been recorded. The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
 M0
+
 G4 P0
 G1 G53 Z0 F6000
 G1 G91 X[-1 * 90 * 5] F6000
@@ -137,8 +132,7 @@ G4 P0
 o105 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 5]]]
 
 o106 if [#5399 NE 0]
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area. Please verify holder and rack alignment is correct as stated in ATC resources page and try again.)
-    M99
+    (abort, ATCI:1|Pull-Stud Not Found|The sensor could not locate the next pull-stud. Please ensure a tool holder is physically in the slot and the rack is parallel to the machine, then try again. Alternatively, consult the Troubleshooting Guide. [A-302-04])
 o106 endif
 
 ;Set z height to position roughtly above stud as the starting position before probing occurred to maintain sensor consistency
@@ -158,7 +152,7 @@ o107 if [#<rackMode> EQ 0]
 
 o107 elseif [#<rackMode> EQ 1]
     (print, Rack Mode 1 detected, continuing to probe second rack position...)
-    (print, ATCI:1|Probe the next pull-stud?)
+    (print, ATCI:0|Pull-stud Position Found|The center of the current pull-stud has been recorded. The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
     M0
     G4 P0
     ;Move to next PS
@@ -185,8 +179,7 @@ o107 elseif [#<rackMode> EQ 1]
     o201 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 5]]]
 
     o202 if [#5399 NE 0]
-        (abort, ATCI:1|Probe failed to find pull-stud within the search area. Please verify holder and rack alignment is correct as stated in ATC resources page and try again.)
-        M99
+        (abort, ATCI:1|Pull-Stud Not Found|The sensor could not locate the next pull-stud. Please ensure a tool holder is physically in the slot and the rack is parallel to the machine, then try again. Alternatively, consult the Troubleshooting Guide. [A-302-04])
     o202 endif
 
     ;Set z height to position roughtly above stud as the starting position before probing occurred to maintain sensor consistency
@@ -199,13 +192,13 @@ o107 elseif [#<rackMode> EQ 1]
 
     ;Check Second Rack Mounting Alignment
     o203 if [[ABS[#<_XPrb> - #<rack2expX>] GT 2] OR [ABS[#<_YPrb> - #<rack2expY>] GT 2] OR [ABS[#<_ZPrb> - #<rack2expZ>] GT 2]]
-        (abort, ATCI:1|Second Rack Missaligned|Probed position does not meet expected tolerance, please re-mount rack in the correct position and retry.)
-        M99
+        (abort, ATCI:1|Rack Alignment Error|The second rack is not in the expected position. Please ensure both racks are lined up side-by-side with no gap between them, then try again. Alternatively, consult Troubleshooting Guide. [A-302-05])
     o203 endif
 
     ;Rough position over 4th pullstud based on tool offset spacing
-    (print, ATCI:1|Probe last pull-stud?)
+    (print, ATCI:0|Pull-stud Position Found|The center of the current pull-stud has been recorded. The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
     M0
+
     G4 P0
     G1 G53 Z0 F6000
     G1 G91 X[-1 * 90 * 5] F6000
@@ -228,8 +221,7 @@ o107 elseif [#<rackMode> EQ 1]
     o204 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 5]]]
 
     o205 if [#5399 NE 0]
-        (abort, ATCI:1|Probe failed to find pull-stud within the search area. Please verify holder and rack alignment is correct as stated in ATC resources page and try again.)
-        M99
+        (abort, ATCI:1|Pull-Stud Not Found|The sensor could not locate the next pull-stud. Please ensure a tool holder is physically in the slot and the rack is parallel to the machine, then try again. Alternatively, consult the Troubleshooting Guide. [A-302-04])
     o205 endif
 
     ;Set z height to position roughtly above stud as the starting position before probing occurred to maintain sensor consistency
@@ -246,7 +238,7 @@ o107 endif
 G10 L2 P7 X[#<_XPrb>] Y[#<_YPrb> + #<probeYOffset>] Z[#<_ZPrb> + #<probeZOffset>] 
 G4 P0
 
-(print, ATCI:0|Probed Rack Offsets| X:#5341 Y:#5342 Z:#5343 Set as rack position offsets)
+(print, ATCI:1|Rack Position Found|Rack position found and rack alignment verified. Select "OK" to home the machine and proceed to the next step. Recorded Rack Coordinates X:#5341 Y:#5342 Z:#5343 [U-302-03])
 M0
 
 ;Return units to inch if previously set

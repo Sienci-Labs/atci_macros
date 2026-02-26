@@ -18,18 +18,19 @@ G65P509;
 ; Check rack size
 G4 P0
 o100 if [#<_tc_slots> EQ 0]
-  (abort, ATCI:1|Rack not configured|Configure your ATC with a rack to continue.)
+  (abort, ATCI:1|Probing Aborted|No rack is configured. Please run ATC Setup to configure your rack and try again. [A-300-01])
 o100 endif
 G4 P0
 ; Check offset mode
 o101 if [#<_irt_offset_mode> EQ 0]
-  (abort, ATCI:1|Probe All Function Disabled|Tools in the rack will be probed upon loading so there is no need to probe all tools beforehand. Go to "ATC Options" if you wish to change this behavior.)
+  (abort, ATCI:1|Probing Aborted|The system is set to "Probe on Load." Tools will be automatically measured the first time they are picked up from the rack. Go to "ATC Options" if you prefer to probe all tools manually beforehand. [A-300-02])
 o101 endif
 G4 P0
+
 ; Check rack presence
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o102 if [#5399 EQ -1]
-  (abort, ATCI:1|Rack not present|Reinstall the rack to continue.)
+  (abort, ATCI:1|Probing Aborted|The rack sensor does not detect a rack. Please ensure the tool rack is physically installed and the rack sensor is triggered, then trying again. [A-300-03])
 o102 endif
 G4 P0.1
 

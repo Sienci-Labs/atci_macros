@@ -36,7 +36,7 @@ o200 elseif [#<_probe_mode> EQ 1]
     ; Check existing offset
     G65P2Q[#<_current_tool>]R2
     o210 while [ABS[#<tool_offset> - #<_value>] GT #<_check_tl_error>]
-        (print, ATCI:0|Offset difference greater than #<_check_tl_error>|Resume to reprobe this tool or reset.)
+        (print, ATCI:0|Tool Length Change Detected|The measured length differs by more than #<_check_tl_error>mm from the recorded value. This may indicate a broken tool, a loose collet, or an incorrect tool in the spindle. Select "Resume" to re-probe the tool and save the new offset. Select "Reset" to stop the program and inspect the tool. [U-500-01])
         M0
         ;Reprobe offset, recursive call has race condition issues so using a while loop instead
         ; Touch-off

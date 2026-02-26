@@ -64,8 +64,7 @@ o202 endwhile
 
 o203 if [#5399 NE 0]
     #<y_prb> = #<_NAN>
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area.)
-    M99
+    (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
 o203 endif
 
 ;Do fine search
@@ -98,8 +97,7 @@ o205 if [#5399 NE 0]
     (print, #<currI> #<currJ>)
     ;return y_prb to null state to prevent garbage value being set (Unused but may want to check later)
     #<y_prb> = #<_NAN>
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area)
-    M99
+    (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
 o205 endif
 
 (print, Front Y Probe Success: #<y_prb>)
@@ -125,7 +123,7 @@ o206 do
     o301 while [[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 40]]]
 
     o302 if [#5399 NE 0]
-        (abort, ATCI:1|Timeout finding y centerline)
+        (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
         M99
     o302 elseif [#5399 EQ 0]
         o401 if [[[#<xLast> - #<_abs_x>] GT 0.05] AND [[#<xLast> - #<_abs_x>] LE 0.5]]
@@ -170,7 +168,7 @@ o207 do
 o207 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 40]]]
 
 o208 if [#5399 NE 0]
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area.)
+    (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
     M99
 o208 endif
 
@@ -204,8 +202,7 @@ o209 do
 o209 while[[#5399 NE 0] AND [#<currI> LT [[#<_yBKOff> / #<_fineStep>] + 5]]]
 
 o210 if [#5399 NE 0]
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area.)
-    M99
+    (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
 o210 endif
 
 #<_XPrb> = #<xCent>
@@ -237,8 +234,7 @@ o213 do
 o213 while[[#5399 NE 0] AND [#<currI> LT [[#<_xBKOff> / #<_fineStep>] + 5]]]
 
 o214 if [#5399 NE 0]
-    (abort, ATCI:1|Probe failed to find pull-stud within the search area.)
-    M99
+    (abort, ATCI:1|Center of Pull-Stud not Found|The sensor did not find the center of the pull-stud. Move the sensor closer to the top of the pull-stud and try again. Alternatively, consult the Troubleshooting Guide. [A-510-01])
 o214 endif
 
 ;Calculate EMA between old Z and latest Z (e = 0.4 from literature for best appx weighting)

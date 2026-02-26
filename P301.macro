@@ -16,10 +16,6 @@ G65P508;
 ; Check tool changer parameters
 G65P509;
 
-o130 if [#<_301_tool_cache> LE 0 OR #<_301_tool_cache> GT #<_tool_table_size>] 
-    (abort, Invalid tool number)
-o130 endif
-
 ;Check pressure with helper function
 G65 P501
 
@@ -83,7 +79,7 @@ o200 else
     (debug, tool change unsuccessful, offset cleared)
     G10 L1 P[#<_301_tool_cache>] Z0
     ;TODO Add retry option
-    (abort, ATCI:2|Tool #<_301_tool_cache> not loaded|Tool holder not in rack or is out of reach by the spindle. Make sure a tool is in the rack and your rack position is set properly.)
+    (abort, ATCI:2|Probing Aborted|Tool #<selected_tool_cache> could not be loaded. Rack slot is empty or out of reach. Ensure the tool is in the correct slot and verify your rack position settings. [A-301-01])
 o200 endif
 
 ; ************ BEGIN RESTORE MODAL ************

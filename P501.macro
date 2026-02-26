@@ -7,7 +7,7 @@ o100 if [#<_pres_sense> EQ 1]
   G4P0.1
   o101 while [#5399 EQ -1]
     G4P0
-    (print, ATCI:0|Action Required|Insufficient air pressure, increase or supply compressed air to the spindle to continue.)
+    (print, ATCI:0|System Pressure Below 82psi|Please check your compressor and regulator settings. Once pressure is restored, select "Resume" to clear this error. [U-501-01])
     G4P0
     M0
     M66 P[#<_tc_input_pres>] L4 Q0.01

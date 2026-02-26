@@ -122,7 +122,7 @@ o161 endif
 o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   G65P2Q[#<selected_tool_cache>]R2
   o171 if [#<_value> EQ 0]
-    (print, ATCI:0|Tool #<selected_tool_cache> has no offset and my not exist in holder|"Resume" to initialize the tool and continue, "Reset" if the slot is empty or if you have made an incorrect selection. [U-TCM-01])
+    (print, ATCI:0|Tool #<selected_tool_cache> Offset Missing|"Resume" to probe the tool on pick-up, "Reset" if the slot is empty or the wrong tool was selected. [U-TCM-01])
     M0
     #<load_offset_mode> = 0
   o171 endif
@@ -229,7 +229,7 @@ o400 if [#<unload_mode> EQ 0]
         G65 P506
         M50 P1
         ; TODO Add a retry loop
-       (abort, ATCI:2|Tool change aborted|Unloading slot occupied. Remove tool from slot #<_current_tool> and try again. [A-TCM-02])
+       (abort, ATCI:2|Tool Change Aborted|Slot #<_current_tool> in the rack is already occupied. Manually remove the tool from the rack at slot #<_current_tool> and try again. [A-TCM-02])
       o412 endif
       #<current_probe_offset> = 0;
 
@@ -255,7 +255,7 @@ o400 if [#<unload_mode> EQ 0]
       ; Exit keepout and re-enable feed override
       G65 P506
       M50 P1
-      (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure. [A-TCM-03])
+      (abort, ATCI:2|Tool Change Aborted|Drawbar failed to engage. Check if the compressor is powered on, if there is sufficient air pressure, and inspect pneumatic lines for kinks or restrictions. [A-TCM-03])
     o420 endif
 
     ; Move away from tool rack
@@ -274,7 +274,7 @@ o400 if [#<unload_mode> EQ 0]
       ; Exit keepout and re-enable feed override
       G65 P506
       M50 P1
-      (abort, ATCI:2|Tool change aborted|Tool #<_current_tool> did not released from spindle, check tool forks for damage. [A-TCM-04])
+      (abort, ATCI:2|Tool Change Aborted|Tool #<_current_tool> failed to release from the spindle. Refer to the Troubleshooting Guide to safely free the tool holder. Inspect tool forks for alignment or mechanical damage. [A-TCM-04])
     o430 endif
 
     ; Move to safe height
@@ -285,7 +285,7 @@ o400 elseif [#<unload_mode> EQ 1]
     ; Pause as long as the tool is not removed
     o440 do
       G4 P0
-      (print, ATCI:0|Action Required|Remove tool #<_current_tool> using the drawbar button. [U-TCM-02])
+      (print, ATCI:0|Action Required|Unload Tool #<_current_tool>|Please use the physical release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-TCM-02])
       G4 P0
       M64 P[#<_tc_output_bt>]
       M0
@@ -438,7 +438,7 @@ o700 if [#<load_mode> EQ 0]
       G65 P506
       M50 P1
       ;TODO Add retry option
-      (abort, ATCI:2|Tool #<selected_tool_cache> not loaded|Tool holder not in rack or is out of reach by the spindle. Make sure a tool is in the rack and your rack position is set properly. [A-TCM-05])
+      (abort, ATCI:2|Tool Tool Change Aborted|Tool #<selected_tool_cache> could not be loaded. Rack slot is empty or out of reach. Ensure the tool is in the correct slot and verify your rack position settings. [A-TCM-05])
     o721 endif
   o720 else
     ;Tool change is successful, pulloff
@@ -451,7 +451,7 @@ o700 elseif [#<load_mode> EQ 1]
   ; Pause as long as the tool is not removed
   o730 do
     G4 P0
-    (print, ATCI:0|Action Required|Install tool #<selected_tool_cache> with drawbar button. [U-TCM-03])
+    (print, ATCI:0|Load Tool #<_current_tool>|Press the physical tool release button on the ATC and insert the tool holder into the spindle. Once the tool is loaded, select "Resume" to continue. [U-TCM-03])
     G4 P0
     M64 P[#<_tc_output_bt>]
     M0

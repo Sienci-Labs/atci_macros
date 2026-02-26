@@ -73,7 +73,7 @@ G65 P509;
 M66 P[#<_tc_input_tis>] L4 Q0.05
 o200 if [[#5399] NE -1]
     o201 do
-        (print, ATCI:0|Action Required|Remove tool using the drawbar button. [U-999-01])
+        (print, ATCI:0|Spindle Must Be Empty During Setup|Press the physical tool release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-999-01])
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
@@ -89,7 +89,7 @@ G49
 ; Check for rack configuration mis-match
 M66 P[#<_tc_input_rack>] L4 Q0.01
 o300 if [#5399 NE -1 AND #<_tc_slots> LE 0]
-    (print, ATCI:1|Rack detected|The rack sensor is triggered, but no rack is specified. If you intend to use a rack with this tool changer, return to the previous page and select the correct rack configuration before continuing. [W-999-01])
+    (print, ATCI:1|Unconfigured Rack Detected|The rack sensor is active, but no rack is configured. Return to the previous page and select a configuration with a rack, or remove the rack and try again. [W-999-01])
 o300 endif
 
 M99

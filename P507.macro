@@ -3,6 +3,6 @@
 
 G4 P0;
 o100 if [EXISTS[#<_initializing>] EQ 1]
-  (abort, ATCI:2|Setup incomplete|Tool changer disabled, restart your controller to continue.)
+  (abort, ATCI:2|Tool Change Aborted|Restart required after ATC Setup. Power cycle your controller to use the ATC. [A-507-01])
 o100 endif
 G4 P0;
