@@ -59,7 +59,7 @@ G4P0.5
 G65P1Q130
 #<manual_x_pos> = [#<_value> - 50]
 G65P1Q131
-#<manual_y_pos> = [-0.6 * #<_value>]
+#<manual_y_pos> = [-0.4 * #<_value>]
 
 G10 L2 P8 X[#<manual_x_pos>] Y[#<manual_y_pos>] Z0
 
