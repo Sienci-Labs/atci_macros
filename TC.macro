@@ -228,7 +228,7 @@ o400 if [#<unload_mode> EQ 0]
         (debug, No tool in tool holder, safe to unload current tool.)
       o412 else
         ; Exit keepout and re-enable feed override
-        G65 P506
+        ;G65 P506
         M50 P1
         ; TODO Add a retry loop
        (abort, ATCI:2|Tool Change Aborted|Slot #<_current_tool> in the rack is already occupied. Manually remove the tool from the rack at slot #<_current_tool> and try again. [A-TCM-02])
@@ -240,8 +240,8 @@ o400 if [#<unload_mode> EQ 0]
     o410 endif
 
     ; Move to tool change location
-    G53 G0 Z[#<_tc_load_z>]
-    G53 G1 Y[#<tc_y_unload>] F[#<_tc_y_pulloff_feed>]
+    G53 G0 Y[#<tc_y_unload>]
+    G53 G1 Z[#<_tc_load_z>] F1000
     G4 P0.5
 
     ; Release drawbar
@@ -255,7 +255,7 @@ o400 if [#<unload_mode> EQ 0]
       M65 P[#<_tc_output_db>]
       G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
       ; Exit keepout and re-enable feed override
-      G65 P506
+      ;G65 P506
       M50 P1
       (abort, ATCI:2|Tool Change Aborted|Drawbar failed to engage. Check if the compressor is powered on, if there is sufficient air pressure, and inspect pneumatic lines for kinks or restrictions. [A-TCM-03])
     o420 endif
@@ -274,7 +274,7 @@ o400 if [#<unload_mode> EQ 0]
       ;TODO Add retry option
       G65 P506
       ; Exit keepout and re-enable feed override
-      G65 P506
+      ;G65 P506
       M50 P1
       (abort, ATCI:2|Tool Change Aborted|Tool #<_current_tool> failed to release from the spindle. Refer to the Troubleshooting Guide to safely free the tool holder. Inspect tool forks for alignment or mechanical damage. [A-TCM-04])
     o430 endif
@@ -402,8 +402,7 @@ o700 if [#<load_mode> EQ 0]
   ; TODO Disable Keepout
   ; Go to load coordinates
   G53 G0 Z[#<_tc_safe_z>]
-  G53 G0 Y[#<tc_y_load>]
-  G53 G0 X[#<tc_x_load>]
+  G53 G0 X[#<tc_x_load>] Y[#<tc_y_load>]
   G53 G0 Z[#<_tc_load_z> + #<_tc_dedust_z_offset>]
   G4 P0.1
 
@@ -417,7 +416,7 @@ o700 if [#<load_mode> EQ 0]
     ;Close drawbar on error
     M65 P[#<_tc_output_db>]
     ; Exit keepout and re-enable feed override
-    G65 P506
+    ;G65 P506
     M50 P1
     (abort, ATCI:2|Tool change aborted|Drawbar did not engage, compressor system may be offline or under pressure. [A-TCM-03])
   o710 endif
@@ -437,15 +436,16 @@ o700 if [#<load_mode> EQ 0]
       #<selected_tool_cache> = #<_empty_tool>
     o721 else
       ; Exit keepout and re-enable feed override
-      G65 P506
+      ;G65 P506
       M50 P1
       ;TODO Add retry option
       (abort, ATCI:2|Tool Tool Change Aborted|Tool #<selected_tool_cache> could not be loaded. Rack slot is empty or out of reach. Ensure the tool is in the correct slot and verify your rack position settings. [A-TCM-05])
     o721 endif
   o720 else
     ;Tool change is successful, pulloff
-    G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
+    G53 G1 Z[#<_tc_load_z> + #<_tc_dedust_z_offset>] F[#<_tc_z_dedust_feed>]
     G53 G0 Z[#<_tc_safe_z>]
+    G53 G0 Y[#<_tc_y_pulloff>]
   o720 endif
 
 o700 elseif [#<load_mode> EQ 1]

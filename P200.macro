@@ -85,7 +85,7 @@ o105 endif
 ; TODO Refine the actual position
 
 #<_tc_safe_x> = #5381 ; X coordinate should be identical to the TLS
-#<_tc_safe_y> = -200    ; Fixed value for now, can update to dynamic value based on rack keepouts at a later date once we vetted reliability.
+#<_tc_safe_y> = -300    ; Fixed value for now, can update to dynamic value based on rack keepouts at a later date once we vetted reliability.
 (debug, Safe Position: X#<_tc_safe_x> Y#<_tc_safe_y>)
 
 ; The Y machine coordinate positon for Y-axis pulloff.
@@ -98,7 +98,7 @@ o105 endif
 
 ; ******** Keepout ********
 ; The X and Y machine coordinate positions of slot 1.
-#<shoe_width> = 120
+#<shoe_width> = 0
 #<fork_width> = 45
 #<shoe_depth> = 60
 #<fork_front_depth> = 30.5
@@ -128,7 +128,7 @@ o104 endif
 
 ; ******** Z Axis ********
 ; The Z machine coordinate positon for load.
-#<_tc_load_z> = #5343
+#<_tc_load_z> = [#5343 + 1.5]
 (debug, Load Z: #<_tc_load_z> from G59.1 coordinate)
 
 ; The Z coordinate offset for dedust start.
