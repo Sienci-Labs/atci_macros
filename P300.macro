@@ -59,10 +59,10 @@ G21 G90
 (debug, Change to metric mode)
 
 ; Record starting position
-#<_tc_start_x_300> =  #5420
-#<_tc_start_y_300> =  #5421
-#<_tc_start_z_300> = #5422
-(debug, Position before tool change: #<_tc_start_x_300>, #<_tc_start_y_300>, #<_tc_start_z_300>)
+#<_tc_start_x_300> =  #<_abs_x>
+#<_tc_start_y_300> =  #<_abs_y>
+#<_tc_start_z_300> = #<_abs_z>
+(debug, Absolute position before tool change: #<_tc_start_x_300>, #<_tc_start_y_300>, #<_tc_start_z_300>)
 
 ; Feed override Off
 M50 P0
@@ -108,11 +108,11 @@ M6T0;
 ; ************ BEGIN RESTORE MODAL ************
 ; xxxxxxxx RESTORE POSITION xxxxxxxx
 ; Move to safe Z
-G0 G53 Z[#<_tc_safe_z>]
+G53 G0 Z[#<_tc_safe_z>]
 
 ; Go to safe position
-G0 G53 X[#<_tc_safe_x>]
-G0 G53 Y[#<_tc_safe_y>]
+G53 G0 X[#<_tc_safe_x>]
+G53 G0 Y[#<_tc_safe_y>]
 
 ; xxxxxxxx RESTORE UNITS xxxxxxxx
 (debug, Reapplying units #<_tc_return_units_300>)

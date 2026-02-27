@@ -61,9 +61,11 @@ o133 if [#5399 NE -1]
   ; Rack present
   ; Check for rack configuration mis-match
   o134 if [#<_tc_slots> LE 0]
-    (abort, ATCI:2|Tool change aborted|Rack is present but is not configured. Visit ATC Setup to configure your rack and try again. [A-TCM-01])
-  o134 endif;
-  #<passthrough> = 0;
+    ;Unconfigured rack present, follow safe area movements to avoid crashing.
+    #<passthrough> = 2;
+  o134 else
+    #<passthrough> = 0;
+  o134 endif
 o133 else
   ; Rack not present
   #<passthrough> = 1;
@@ -108,19 +110,19 @@ o141 endif
 
 o160 if [#<_current_tool> GT #<_tc_slots> OR [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> GT 0 AND #<passthrough> EQ 1 AND #<_passthrough_offset_setting> EQ 0]]
   #<unload_offset_mode> = #<_ort_offset_mode>
-o160 elseif [#<_current_tool> LE #<_tc_slots> AND #<_current_tool> GT 0]
+o160 else
   #<unload_offset_mode> = #<_irt_offset_mode>
 o160 endif
 
 o161 if [#<selected_tool_cache> GT #<_tc_slots> OR [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> GT 0 AND #<passthrough> EQ 1 AND #<_passthrough_offset_setting> EQ 0]]
   #<load_offset_mode> = #<_ort_offset_mode>
-o161 elseif [#<selected_tool_cache> LE #<_tc_slots> AND #<selected_tool_cache> GT 0]
+o161 else
   #<load_offset_mode> = #<_irt_offset_mode>
 o161 endif
 
 ;Force probing when user selected a tool without an offset
 o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
-  G65P2Q[#<selected_tool_cache>]R2
+  G65 P2 Q[#<selected_tool_cache>] R2
   o171 if [#<_value> EQ 0]
     (print, ATCI:0|Tool #<selected_tool_cache> Offset Missing|"Resume" to probe the tool on pick-up, "Reset" if the slot is empty or the wrong tool was selected. [U-TCM-01])
     M0
@@ -153,10 +155,10 @@ G21 G90
 (debug, Change to metric mode)
 
 ; Record starting position
-#<tc_start_x> =  #5420
-#<tc_start_y> =  #5421
-#<tc_start_z> = #5422
-(debug, Position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
+#<tc_start_x> =  #<_abs_x>
+#<tc_start_y> =  #<_abs_y>
+#<tc_start_z> = #<_abs_z>
+(debug, Absolute position before tool change: #<tc_start_x>, #<tc_start_y>, #<tc_start_z>)
 
 ; Feed override Off
 M50 P0
@@ -181,7 +183,7 @@ o300 if [#<unload_mode> EQ 0]
   (debug, Disable keepout)
 o300 elseif [#<unload_mode> EQ 1]
   ; Move to off rack position
-  o310 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+  o310 if [[#<_tc_slots> EQ 0 AND #<passthrough> EQ 0] OR #<passthrough> EQ 1]
     G65 P505 Q1
   o310 else
     G65 P505 Q0
@@ -375,7 +377,7 @@ o600 else
     ; Load to happen off rack
     ; Move to off rack position
     ; Move to off rack position
-    o631 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+    o631 if [[#<_tc_slots> EQ 0 AND #<passthrough> EQ 0] OR #<passthrough> EQ 1]
       G65 P505 Q1
     o631 else
       G65 P505 Q0
@@ -487,7 +489,7 @@ o800 elseif [#<load_mode> EQ 1]
   ; Move directly if rack does not exist or is not present
   ; Else hold position
   o810 if [#<probing> EQ 0 AND #<load_offset_mode> NE 1]
-    o811 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+    o811 if [[#<_tc_slots> EQ 0 AND #<passthrough> EQ 0] OR #<passthrough> EQ 1]
       G65 P504 Q1
     o811 else
       G65 P504 Q0
@@ -532,9 +534,9 @@ o900 endif
 ;Ignore when M6 is triggered as part of a probing cycle
 o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
   ; Move to safe Z
-  G0 G53 Z[#<_tc_safe_z>]
+  G53 G0 Z[#<_tc_safe_z>]
 
-  o1010 if [#<_tc_slots> EQ 0 OR #<passthrough> EQ 1]
+  o1010 if [[#<_tc_slots> EQ 0 AND #<passthrough> EQ 0] OR #<passthrough> EQ 1]
     ;Skip
   o1010 else
     ; Check current position > safe
@@ -545,12 +547,12 @@ o1000 if [#<load_mode> NE -1 AND #<probing> EQ 0]
 
     ; Check target position > safe
     o1012 if [#<tc_start_y> GE #<_tc_safe_y>]
-      G0 X[#<tc_start_x>]
+      G53 G0 X[#<tc_start_x>]
     o1012 endif
   o1010 endif
   
   ; Restore original position
-  G0 X[#<tc_start_x>]Y[#<tc_start_y>]
+  G53 G0 X[#<tc_start_x>]Y[#<tc_start_y>]
 
 o1000 endif
 
