@@ -453,7 +453,7 @@ o700 elseif [#<load_mode> EQ 1]
   ; Pause as long as the tool is not removed
   o730 do
     G4 P0
-    (print, ATCI:0|Load Tool #<_current_tool>|Press the physical tool release button on the ATC and insert the tool holder into the spindle. Once the tool is loaded, select "Resume" to continue. [U-TCM-03])
+    (print, ATCI:0|Load Tool #<selected_tool_cache>|Press the physical tool release button on the ATC and insert the tool holder into the spindle. Once the tool is loaded, select "Resume" to continue. [U-TCM-03])
     G4 P0
     M64 P[#<_tc_output_bt>]
     M0
