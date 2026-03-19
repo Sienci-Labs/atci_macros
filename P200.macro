@@ -109,7 +109,7 @@ o105 endif
 (print, Keepout X max: #<keepout_x_max>)
 #<keepout_y_min> = [#<_tc_slot_one_y> - #<fork_front_depth> - #<shoe_depth>]
 (print, Keepout Y min: #<keepout_y_min>)
-#<keepout_y_max> = 0
+#<keepout_y_max> = 0.05
 (print, Keepout Y max #<keepout_y_max>)
 
 G65P1Q684S[#<keepout_x_min>]
