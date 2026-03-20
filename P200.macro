@@ -109,7 +109,7 @@ o105 endif
 (print, Keepout X max: #<keepout_x_max>)
 #<keepout_y_min> = [#<_tc_slot_one_y> - #<fork_front_depth> - #<shoe_depth>]
 (print, Keepout Y min: #<keepout_y_min>)
-#<keepout_y_max> = 0.05
+#<keepout_y_max> = 1
 (print, Keepout Y max #<keepout_y_max>)
 
 G65P1Q684S[#<keepout_x_min>]
@@ -271,13 +271,14 @@ o200 else
 
   ; Check for rack configuration mis-match
   M66 P[#<_tc_input_rack>] L4 Q0.01
-  o320 if [#5399 NE -1 AND #<_tc_slots> LE 0]
+  o320 if [#5399 NE -1]
+    M960 P1
+    ;Re-enable keepout unless rack is not present
     o321 if [#<_tc_slots> LE 0]
     (abort, ATCI:1|Tool Changer Disabled|The rack sensor is active, but no rack is configured. Please run ATC Setup to configure your rack and try again. [A-200-11])
     o321 endif
   o320 else
-  ;Re-enable keepout unless rack is not present
-    M960 P1
+    M960 P0
   o320 endif
 
   ; ******** APPLY TOOL OFFSET ********
