@@ -74,7 +74,7 @@ o103 elseif [#<_tc_slots> EQ 12]
     (print, Configured for 12 Tool: Rack Mode 1)
     #<rackMode> = 1
 o103 else
-    (abort, ATCI:1|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Continue" to resume. [U-302-02])
+    (abort, ATCI:1|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
 o103 endif
 
 ;check probe in starting position
@@ -90,7 +90,7 @@ M960 P0
 G4 P0.1
 
 ;Begin Probing Sequence
-(print, ATCI:0|Machine Movement Caution|The machine is about to perform an automated routine to determine rack position. Please be ready to E-stop the machine if a collision appears imminent. Select "Continue" to resume. [U-302-01])
+(print, ATCI:0|Machine Movement Caution|The machine is about to perform an automated routine to determine rack position. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-01])
 M0
 
 ;Initialize staring position for determining Z height offset when probing x and y
@@ -107,7 +107,7 @@ G65 P510
 #<_ZPrbSensitivity> = [0.8 * ABS[#<_ZPrb> - #<startZ>]]
 
 ;rough position over second pullstud based on tool offset spacing
-(print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Continue" to resume. [U-302-02])
+(print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
 M0
 
 G4 P0
@@ -152,7 +152,7 @@ o107 if [#<rackMode> EQ 0]
 
 o107 elseif [#<rackMode> EQ 1]
     (print, Rack Mode 1 detected, continuing to probe second rack position...)
-    (print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Continue" to resume. [U-302-02])
+    (print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
     M0
     G4 P0
     ;Move to next PS
@@ -196,7 +196,7 @@ o107 elseif [#<rackMode> EQ 1]
     o203 endif
 
     ;Rough position over 4th pullstud based on tool offset spacing
-    (print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Continue" to resume. [U-302-02])
+    (print, ATCI:0|Pull-Stud Position Found|The machine will now move to the next position in the sequence. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-02])
     M0
 
     G4 P0

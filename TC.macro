@@ -124,7 +124,7 @@ o161 endif
 o170 if [#<probing> EQ 0 AND #<load_offset_mode> GT 0]
   G65 P2 Q[#<selected_tool_cache>] R2
   o171 if [#<_value> EQ 0]
-    (print, ATCI:0|Tool #<selected_tool_cache> Offset Missing|"Continue" to probe the tool on pick-up, "Reset" if the slot is empty or the wrong tool was selected. [U-TCM-01])
+    (print, ATCI:0|Tool #<selected_tool_cache> Offset Missing|"Resume" to probe the tool on pick-up, "Reset" if the slot is empty or the wrong tool was selected. [U-TCM-01])
     M0
     #<load_offset_mode> = 0
   o171 endif
@@ -287,7 +287,7 @@ o400 elseif [#<unload_mode> EQ 1]
     ; Pause as long as the tool is not removed
     o440 do
       G4 P0
-      (print, ATCI:0|Action Required|Unload Tool #<_current_tool>|Please use the physical release button on the ATC to remove the tool. Once the spindle is empty, select "Continue" to resume. [U-TCM-02])
+      (print, ATCI:0|Action Required|Unload Tool #<_current_tool>|Please use the physical release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-TCM-02])
       G4 P0
       M64 P[#<_tc_output_bt>]
       M0
@@ -453,7 +453,7 @@ o700 elseif [#<load_mode> EQ 1]
   ; Pause as long as the tool is not removed
   o730 do
     G4 P0
-    (print, ATCI:0|Load Tool #<selected_tool_cache>|Press the physical tool release button on the ATC and insert the tool holder into the spindle. Once the tool is loaded, select "Continue" to resume. [U-TCM-03])
+    (print, ATCI:0|Load Tool #<selected_tool_cache>|Press the physical tool release button on the ATC and insert the tool holder into the spindle. Once the tool is loaded, select "Resume" to continue. [U-TCM-03])
     G4 P0
     M64 P[#<_tc_output_bt>]
     M0

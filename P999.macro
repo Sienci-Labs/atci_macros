@@ -73,7 +73,7 @@ G65 P509;
 M66 P[#<_tc_input_tis>] L4 Q0.05
 o200 if [[#5399] NE -1]
     o201 do
-        (print, ATCI:0|Spindle Must Be Empty During Setup|Press the physical tool release button on the ATC to remove the tool. Once the spindle is empty, select "Continue" to resume. [U-999-01])
+        (print, ATCI:0|Spindle Must Be Empty During Setup|Press the physical tool release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-999-01])
         G4P0
         M64 P[#<_tc_output_bt>]
         M0
