@@ -90,7 +90,7 @@ M960 P0
 G4 P0.1
 
 ;Begin Probing Sequence
-(print, ATCI:0|Machine Movement Caution|The machine is about to perform an automated routine to determine rack position. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-01])
+(print, ATCI:0|Machine Movement|The machine is about to perform an automated routine to determine rack position. Please be ready to E-stop the machine if a collision appears imminent. Select "Resume" to continue. [U-302-01])
 M0
 
 ;Initialize staring position for determining Z height offset when probing x and y
