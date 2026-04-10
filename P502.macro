@@ -5,7 +5,7 @@
 M66 P[#<_tc_input_tis>] L4 Q0.5
 o100 if [[#5399] EQ -1]
   o101 if [#<_current_tool> GT 0 AND #<_current_tool> LT #<_tool_table_size>]
-    (print, ATCI:0|Tool Mismatch Detected|No tool detected in spindle, but Tool #<active_tool> is active in software. Select "Resume" to set the spindle to "Empty" and continue. [U-502-01])
+    (print, ATCI:0|Tool Mismatch Detected|No tool detected in spindle, but Tool #<_current_tool> is active in software. Select "Resume" to set the spindle to "Empty" and continue. [U-502-01])
     M0
     M61 Q[#<_empty_tool>]
     G49
