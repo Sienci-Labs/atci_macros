@@ -238,13 +238,21 @@ o107 endif
 G10 L2 P7 X[#<_XPrb>] Y[#<_YPrb> + #<probeYOffset>] Z[#<_ZPrb> + #<probeZOffset>] 
 G4 P0
 
-(print, ATCI:1|Rack Position Found|Rack position found and rack alignment verified. Select "OK" to home the machine and proceed to the next step. Recorded Rack Coordinates X:#5341 Y:#5342 Z:#5343 [U-302-03])
-M0
+#<dsp_x> = #5341
+#<dsp_y> = #5342
+#<dsp_z> = #5343
 
 ;Return units to inch if previously set
 o201 if [#<setUnits> EQ 1]
     G20
+    #<dsp_x> = [#5341 / 25.4]
+    #<dsp_y> = [#5342 / 25.4]
+    #<dsp_z> = [#5343 / 25.4]
+
 o201 endif
+
+(print, ATCI:1|Rack Position Found|Rack position found and rack alignment verified. Select "OK" to home the machine and proceed to the next step. Recorded Rack Coordinates X:#<dsp_x> Y:#<dsp_y> Z:#<dsp_z> [U-302-03])
+M0
 
 (print, PROBE MACRO COMPLETE)
 
