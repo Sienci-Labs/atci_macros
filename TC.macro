@@ -287,7 +287,7 @@ o400 elseif [#<unload_mode> EQ 1]
     ; Pause as long as the tool is not removed
     o440 do
       G4 P0
-      (print, ATCI:0|Action Required|Unload Tool #<_current_tool>|Please use the physical release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-TCM-02])
+      (print, ATCI:0|Unload Tool #<_current_tool>|Please use the physical release button on the ATC to remove the tool. Once the spindle is empty, select "Resume" to continue. [U-TCM-02])
       G4 P0
       M64 P[#<_tc_output_bt>]
       M0
