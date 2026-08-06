@@ -444,8 +444,9 @@ o700 if [#<load_mode> EQ 0]
     o721 endif
   o720 else
     ;Tool change is successful, pulloff
-    G53 G1 Y[#<_tc_y_pulloff>] F[#<_tc_y_pulloff_feed>]
+    G53 G1 Y[#<_tc_y_pulloff> - 4] F[#<_tc_y_pulloff_feed>] ;Fix to accommodate additional dust shoe skew, checked and will continue to fit the largest of bits,
     G53 G0 Z[#<_tc_safe_z>]
+    G53 G0 Y[#<_tc_y_pulloff>] ;Restore to pull off y
   o720 endif
 
 o700 elseif [#<load_mode> EQ 1]
