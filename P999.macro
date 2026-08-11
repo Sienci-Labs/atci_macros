@@ -13,7 +13,7 @@ $675 = 3;       Execute M6T0 and Fail M6 if tc.macro is not found
 
 ; xxxxxxxx PIN CONFIG xxxxxxxx
 $370 = 0;       Invert I/O Port inputs (TODO: Not override unrrelated bitfields)
-$372 = 1;       Invert I/O Port outputs (TODO: Not override unrrelated bitfields)
+$372 = 0;       Invert I/O Port outputs (TODO: Not override unrrelated bitfields)
 
 $750 = 7;       Event 1 trigger: Spindle at speed
 $751 = 0;       Event 2 trigger: M62 - M65 only

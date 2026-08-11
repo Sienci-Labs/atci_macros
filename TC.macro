@@ -209,6 +209,7 @@ o400 if [#<unload_mode> EQ 0]
     G53 G0 X[#<tc_x_unload>] Y[#<_tc_y_pulloff>]
 
     ; Tool holder check
+    #<_holder_sense> = 0  ; Hard Disable for NSS
     o410 if [#<_holder_sense> EQ 1]
       (debug, Checking tool presence for collision)
       G53 G0 Y[#<tc_y_unload> + #<_tc_holder_sense_offset_y>]

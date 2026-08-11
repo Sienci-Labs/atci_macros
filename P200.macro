@@ -94,7 +94,7 @@ o105 endif
 (debug, Safe Position: X#<_tc_safe_x> Y#<_tc_safe_y>)
 
 ; The Y machine coordinate positon for Y-axis pulloff.
-#<_tc_y_pulloff> = [#<_tc_slot_one_y> + 44]
+#<_tc_y_pulloff> = [#<_tc_slot_one_y> + 30]
 (debug, Pulloff Y: #<_tc_y_pulloff>)
 
 ; The feedrate for Y-axis pulloff.
